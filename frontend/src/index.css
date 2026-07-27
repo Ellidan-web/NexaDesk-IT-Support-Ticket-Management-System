@@ -1,23 +1,82 @@
-﻿@tailwind base;
+﻿@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+
+@tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
+  * {
+    @apply scroll-smooth;
+  }
+  
   body {
-    @apply bg-gray-50 text-gray-900 antialiased;
+    @apply bg-nexa-light text-nexa-primary antialiased;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-bold tracking-tight;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply px-4 py-2 bg-nexa-primary text-white rounded-lg hover:bg-nexa-secondary transition-colors duration-200;
+    @apply px-6 py-3 bg-nexa-accent text-white rounded-lg font-semibold 
+           hover:bg-nexa-accent-light hover:scale-105 
+           transition-all duration-300 shadow-lg shadow-nexa-accent/30
+           focus:outline-none focus:ring-2 focus:ring-nexa-accent focus:ring-offset-2;
+  }
+  
+  .btn-secondary {
+    @apply px-6 py-3 bg-white text-nexa-primary rounded-lg font-semibold 
+           border-2 border-nexa-primary/10 hover:border-nexa-accent 
+           hover:bg-nexa-accent/5 hover:scale-105 
+           transition-all duration-300;
   }
   
   .btn-outline {
-    @apply px-4 py-2 border-2 border-nexa-primary text-nexa-primary rounded-lg hover:bg-nexa-primary hover:text-white transition-colors duration-200;
+    @apply px-4 py-2 border-2 border-nexa-accent text-nexa-accent 
+           rounded-lg hover:bg-nexa-accent hover:text-white 
+           transition-all duration-300 font-medium;
   }
-  
+
   .card {
-    @apply bg-white rounded-xl shadow-md hover:shadow-lg transition-shadow duration-200 p-6;
+    @apply bg-white rounded-2xl shadow-xl hover:shadow-2xl 
+           transition-all duration-300 p-8 
+           hover:-translate-y-2 hover:shadow-nexa-accent/10
+           border border-gray-100/50 backdrop-blur-sm;
+  }
+
+  .section-title {
+    @apply text-4xl md:text-5xl lg:text-6xl font-extrabold 
+           text-nexa-primary leading-tight;
+  }
+
+  .section-subtitle {
+    @apply text-xl text-nexa-gray max-w-2xl mx-auto leading-relaxed;
+  }
+
+  .gradient-text {
+    @apply bg-gradient-to-r from-nexa-accent to-purple-600 
+           bg-clip-text text-transparent;
+  }
+
+  .glass-effect {
+    @apply bg-white/80 backdrop-blur-sm border border-white/20;
+  }
+}
+
+@layer utilities {
+  .animate-delay-1 {
+    animation-delay: 0.1s;
+  }
+  .animate-delay-2 {
+    animation-delay: 0.2s;
+  }
+  .animate-delay-3 {
+    animation-delay: 0.3s;
+  }
+  .animate-delay-4 {
+    animation-delay: 0.4s;
   }
 }
