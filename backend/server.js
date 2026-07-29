@@ -9,6 +9,7 @@ const logger = require('./utils/logger');
 // Import routes
 const routes = require('./routes');
 const authRoutes = require('./routes/authRoutes');
+const ticketRoutes = require('./routes/ticketRoutes');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
