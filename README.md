@@ -1,4 +1,3 @@
-````md
 # NexaDesk - IT Support Ticket Management System
 
 A full-stack IT help desk application built with React, Node.js, Express, and Supabase PostgreSQL for managing, tracking, and resolving support tickets.
