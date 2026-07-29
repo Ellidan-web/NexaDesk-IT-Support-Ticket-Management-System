@@ -87,10 +87,17 @@ const getTicketById = async (req, res) => {
         const userId = req.user.id;
         const userRole = req.user.role;
 
-        // Get ticket
+        // Get ticket with user info
         const { data: ticket, error: ticketError } = await supabaseAdmin
             .from('tickets')
-            .select('*, users!user_id(name, email)')
+            .select(`
+                *,
+                users:user_id (
+                    id,
+                    name,
+                    email
+                )
+            `)
             .eq('id', id)
             .single();
 
@@ -98,7 +105,7 @@ const getTicketById = async (req, res) => {
             return res.status(404).json({ error: 'Ticket not found' });
         }
 
-        // Check access (users can see their own tickets, admins can see all)
+        // Check access
         if (ticket.user_id !== userId && userRole !== 'admin' && userRole !== 'staff') {
             return res.status(403).json({ error: 'Access denied' });
         }
@@ -106,7 +113,14 @@ const getTicketById = async (req, res) => {
         // Get comments
         const { data: comments, error: commentsError } = await supabaseAdmin
             .from('comments')
-            .select('*, users!user_id(name, email)')
+            .select(`
+                *,
+                users:user_id (
+                    id,
+                    name,
+                    email
+                )
+            `)
             .eq('ticket_id', id)
             .order('created_at', { ascending: true });
 
@@ -117,7 +131,14 @@ const getTicketById = async (req, res) => {
         // Get history
         const { data: history, error: historyError } = await supabaseAdmin
             .from('ticket_history')
-            .select('*, users!changed_by(name, email)')
+            .select(`
+                *,
+                users:changed_by (
+                    id,
+                    name,
+                    email
+                )
+            `)
             .eq('ticket_id', id)
             .order('created_at', { ascending: true });
 
@@ -336,21 +357,16 @@ const addComment = async (req, res) => {
 };
 
 // Admin: Get all tickets
-// Admin: Get all tickets
 const getAllTickets = async (req, res) => {
     try {
         const { status, priority, assignedTo } = req.query;
 
+        // Start with base query
         let query = supabaseAdmin
             .from('tickets')
             .select(`
                 *,
-                users!tickets_user_id_fkey (
-                    id,
-                    name,
-                    email
-                ),
-                assigned_users:users!tickets_assigned_to_fkey (
+                users:user_id (
                     id,
                     name,
                     email
@@ -373,7 +389,7 @@ const getAllTickets = async (req, res) => {
 
         if (error) {
             console.error('Get all tickets error:', error);
-            return res.status(500).json({ error: 'Failed to get tickets' });
+            return res.status(500).json({ error: 'Failed to get tickets', details: error.message });
         }
 
         res.json({ tickets });
