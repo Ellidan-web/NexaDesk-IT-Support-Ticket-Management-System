@@ -30,6 +30,7 @@ app.use(morgan('dev'));
 // API Routes
 app.use('/api', routes);
 app.use('/api/auth', authRoutes);
+app.use('/api/tickets', ticketRoutes);
 
 // Root route
 app.get('/', (req, res) => {
@@ -62,5 +63,6 @@ app.listen(PORT, () => {
     console.log(`🚀 NexaDesk Server running on http://localhost:${PORT}`);
     console.log(`📊 Health check: http://localhost:${PORT}/api/health`);
     console.log(`🔐 Auth routes: http://localhost:${PORT}/api/auth`);
+    console.log(`🎫 Ticket routes: http://localhost:${PORT}/api/tickets`);
     console.log(`🌐 Environment: ${process.env.NODE_ENV || 'development'}`);
 });
