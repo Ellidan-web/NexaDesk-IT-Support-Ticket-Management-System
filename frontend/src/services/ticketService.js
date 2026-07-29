@@ -129,6 +129,19 @@ const ticketService = {
                 error: error.response?.data?.error || 'Failed to assign ticket'
             };
         }
+    },
+
+    // Admin: Get all users
+    getAllUsers: async () => {
+        try {
+            const response = await api.get('/auth/users');
+            return { success: true, data: response.data };
+        } catch (error) {
+            return {
+                success: false,
+                error: error.response?.data?.error || 'Failed to get users'
+            };
+        }
     }
 };
 
