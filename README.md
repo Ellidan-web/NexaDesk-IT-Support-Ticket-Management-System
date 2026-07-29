@@ -3,6 +3,47 @@
 A full-stack IT help desk application built with React, Node.js, Express, and Supabase PostgreSQL for managing, tracking, and resolving support tickets.
 
 ---
+## 📸 Screenshots
+
+### Landing Page
+![Landing Page](screenshots/landing-page.JPG)
+
+---
+
+### Login & Register
+![Login](screenshots/login.JPG)
+![Register](screenshots/register.JPG)
+
+---
+
+### User Dashboard
+![User Dashboard](screenshots/user-dashboard.JPG)
+
+---
+
+### Create Ticket
+![Create Ticket](screenshots/create-ticket.JPG)
+
+---
+
+### My Tickets
+![My Tickets](screenshots/my-tickets.JPG)
+
+---
+
+### Ticket Detail
+![Ticket Detail](screenshots/detailed-ticket.JPG)
+
+---
+
+### Admin Dashboard
+![Admin Dashboard](screenshots/admin-dashboard.JPG)
+
+---
+
+### Admin Tickets
+![Admin Tickets 1](screenshots/admin-tickets.JPG)
+---
 
 ## Features
 
