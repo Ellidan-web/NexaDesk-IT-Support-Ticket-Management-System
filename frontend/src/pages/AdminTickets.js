@@ -95,7 +95,6 @@ const AdminTickets = () => {
                     </div>
                 )}
 
-                {/* Filters */}
                 <div className="bg-white rounded-2xl shadow-xl p-6 mb-8">
                     <div className="grid md:grid-cols-2 gap-4">
                         <div>
@@ -137,7 +136,6 @@ const AdminTickets = () => {
                     </button>
                 </div>
 
-                {/* Tickets Table */}
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                     {filteredTickets.length === 0 ? (
                         <div className="text-center py-12">

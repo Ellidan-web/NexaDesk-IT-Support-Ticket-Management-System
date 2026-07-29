@@ -336,13 +336,26 @@ const addComment = async (req, res) => {
 };
 
 // Admin: Get all tickets
+// Admin: Get all tickets
 const getAllTickets = async (req, res) => {
     try {
         const { status, priority, assignedTo } = req.query;
 
         let query = supabaseAdmin
             .from('tickets')
-            .select('*, users!user_id(name, email), assigned_users!assigned_to(name, email)')
+            .select(`
+                *,
+                users!tickets_user_id_fkey (
+                    id,
+                    name,
+                    email
+                ),
+                assigned_users:users!tickets_assigned_to_fkey (
+                    id,
+                    name,
+                    email
+                )
+            `)
             .order('created_at', { ascending: false });
 
         // Apply filters
@@ -370,7 +383,6 @@ const getAllTickets = async (req, res) => {
         res.status(500).json({ error: 'Failed to get tickets' });
     }
 };
-
 // Admin: Assign ticket to user
 const assignTicket = async (req, res) => {
     try {

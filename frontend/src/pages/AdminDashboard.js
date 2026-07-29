@@ -15,6 +15,7 @@ const AdminDashboard = () => {
     });
     const [recentTickets, setRecentTickets] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState('');
 
     useEffect(() => {
         loadAdminData();
@@ -34,6 +35,8 @@ const AdminDashboard = () => {
                 critical: tickets.filter(t => t.priority === 'CRITICAL').length,
                 high: tickets.filter(t => t.priority === 'HIGH').length
             });
+        } else {
+            setError(result.error);
         }
         setLoading(false);
     };
@@ -59,7 +62,12 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Stats Grid */}
+                {error && (
+                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6">
+                        {error}
+                    </div>
+                )}
+
                 <div className="grid md:grid-cols-5 gap-6 mb-8">
                     <div className="bg-white rounded-2xl shadow-xl p-6">
                         <h3 className="text-sm font-medium text-nexa-gray">Total Tickets</h3>
@@ -83,7 +91,6 @@ const AdminDashboard = () => {
                     </div>
                 </div>
 
-                {/* Recent Tickets */}
                 <div className="bg-white rounded-2xl shadow-xl p-8">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl font-bold text-nexa-primary">Recent Tickets</h2>
