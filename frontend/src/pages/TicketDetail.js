@@ -10,14 +10,20 @@ const TicketDetail = () => {
     const [ticket, setTicket] = useState(null);
     const [comments, setComments] = useState([]);
     const [history, setHistory] = useState([]);
+    const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [comment, setComment] = useState('');
     const [submitting, setSubmitting] = useState(false);
-    const [updatingStatus, setUpdatingStatus] = useState(false);
+    const [updating, setUpdating] = useState(false);
+
+    const isAdmin = user?.role === 'admin' || user?.role === 'staff';
 
     useEffect(() => {
         loadTicket();
+        if (isAdmin) {
+            loadUsers();
+        }
     }, [id]);
 
     const loadTicket = async () => {
@@ -31,6 +37,13 @@ const TicketDetail = () => {
             setError(result.error);
         }
         setLoading(false);
+    };
+
+    const loadUsers = async () => {
+        const result = await ticketService.getAllUsers();
+        if (result.success) {
+            setUsers(result.data.users);
+        }
     };
 
     const handleAddComment = async (e) => {
@@ -52,7 +65,7 @@ const TicketDetail = () => {
     const handleStatusChange = async (newStatus) => {
         if (!window.confirm(`Change status to ${newStatus}?`)) return;
 
-        setUpdatingStatus(true);
+        setUpdating(true);
         const result = await ticketService.updateStatus(id, newStatus);
         if (result.success) {
             setTicket(result.data.ticket);
@@ -60,13 +73,13 @@ const TicketDetail = () => {
         } else {
             alert(result.error);
         }
-        setUpdatingStatus(false);
+        setUpdating(false);
     };
 
     const handlePriorityChange = async (newPriority) => {
         if (!window.confirm(`Change priority to ${newPriority}?`)) return;
 
-        setUpdatingStatus(true);
+        setUpdating(true);
         const result = await ticketService.updatePriority(id, newPriority);
         if (result.success) {
             setTicket(result.data.ticket);
@@ -74,7 +87,19 @@ const TicketDetail = () => {
         } else {
             alert(result.error);
         }
-        setUpdatingStatus(false);
+        setUpdating(false);
+    };
+
+    const handleAssignUser = async (assignedTo) => {
+        setUpdating(true);
+        const result = await ticketService.assignTicket(id, assignedTo);
+        if (result.success) {
+            setTicket(result.data.ticket);
+            await loadTicket();
+        } else {
+            alert(result.error);
+        }
+        setUpdating(false);
     };
 
     const getStatusColor = (status) => {
@@ -130,46 +155,93 @@ const TicketDetail = () => {
         <div className="min-h-screen bg-nexa-light pt-20">
             <div className="container mx-auto px-4 py-12">
                 <button
-                    onClick={() => navigate('/my-tickets')}
+                    onClick={() => isAdmin ? navigate('/admin/tickets') : navigate('/my-tickets')}
                     className="text-nexa-gray hover:text-nexa-primary mb-6 inline-flex items-center"
                 >
-                    ← Back to Tickets
+                    ← Back to {isAdmin ? 'All Tickets' : 'My Tickets'}
                 </button>
 
                 <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
                     <div className="flex justify-between items-start flex-wrap gap-4">
                         <div>
                             <h1 className="text-3xl font-bold text-nexa-primary">{ticket.title}</h1>
-                            <p className="text-nexa-gray mt-1">#{ticket.id.slice(0, 8)} • Created by {ticket.users?.name || 'Unknown'}</p>
+                            <p className="text-nexa-gray mt-1">
+                                #{ticket.id.slice(0, 8)} • 
+                                Created by {ticket.users?.name || 'Unknown'}
+                                {isAdmin && ticket.users && (
+                                    <span className="ml-2 text-sm text-nexa-gray">
+                                        ({ticket.users?.email})
+                                    </span>
+                                )}
+                            </p>
                         </div>
-                        <div className="flex gap-2 flex-wrap">
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-nexa-gray">Status:</span>
-                                <select
-                                    value={ticket.status}
-                                    onChange={(e) => handleStatusChange(e.target.value)}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(ticket.status)}`}
-                                    disabled={updatingStatus}
-                                >
-                                    {statuses.map((s) => (
-                                        <option key={s} value={s}>{s}</option>
-                                    ))}
-                                </select>
+
+                        {isAdmin && (
+                            <div className="bg-nexa-light rounded-xl p-4 w-full md:w-auto">
+                                <p className="text-xs font-semibold text-nexa-gray uppercase mb-2">Admin Controls</p>
+                                <div className="flex flex-wrap gap-3">
+                                    <div>
+                                        <label className="text-xs text-nexa-gray block mb-1">Status</label>
+                                        <select
+                                            value={ticket.status}
+                                            onChange={(e) => handleStatusChange(e.target.value)}
+                                            className={`px-3 py-1 rounded-full text-xs font-medium border-0 ${getStatusColor(ticket.status)}`}
+                                            disabled={updating}
+                                        >
+                                            {statuses.map((s) => (
+                                                <option key={s} value={s}>{s}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-nexa-gray block mb-1">Priority</label>
+                                        <select
+                                            value={ticket.priority}
+                                            onChange={(e) => handlePriorityChange(e.target.value)}
+                                            className={`px-3 py-1 rounded-full text-xs font-medium border-0 ${getPriorityColor(ticket.priority)}`}
+                                            disabled={updating}
+                                        >
+                                            {priorities.map((p) => (
+                                                <option key={p} value={p}>{p}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label className="text-xs text-nexa-gray block mb-1">Assign To</label>
+                                        <select
+                                            value={ticket.assigned_to || ''}
+                                            onChange={(e) => handleAssignUser(e.target.value || null)}
+                                            className="px-3 py-1 rounded-full text-xs font-medium border border-gray-300 bg-white"
+                                            disabled={updating}
+                                        >
+                                            <option value="">Unassigned</option>
+                                            {users.map((u) => (
+                                                <option key={u.id} value={u.id}>
+                                                    {u.name}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="flex items-center gap-2">
-                                <span className="text-sm text-nexa-gray">Priority:</span>
-                                <select
-                                    value={ticket.priority}
-                                    onChange={(e) => handlePriorityChange(e.target.value)}
-                                    className={`px-3 py-1 rounded-full text-xs font-medium border-0 ${getPriorityColor(ticket.priority)}`}
-                                    disabled={updatingStatus}
-                                >
-                                    {priorities.map((p) => (
-                                        <option key={p} value={p}>{p}</option>
-                                    ))}
-                                </select>
+                        )}
+
+                        {!isAdmin && (
+                            <div className="flex gap-2 flex-wrap">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-nexa-gray">Status:</span>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(ticket.status)}`}>
+                                        {ticket.status}
+                                    </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm text-nexa-gray">Priority:</span>
+                                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getPriorityColor(ticket.priority)}`}>
+                                        {ticket.priority}
+                                    </span>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
 
                     <div className="mt-6">
@@ -191,7 +263,7 @@ const TicketDetail = () => {
                         <div>
                             <p className="text-sm text-nexa-gray">Assigned To</p>
                             <p className="font-medium text-nexa-primary">
-                                {ticket.assigned_to || 'Unassigned'}
+                                {ticket.assigned_to ? 'Assigned' : 'Unassigned'}
                             </p>
                         </div>
                         <div>
@@ -199,6 +271,14 @@ const TicketDetail = () => {
                             <p className="font-medium text-nexa-primary">{ticket.users?.name || 'Unknown'}</p>
                         </div>
                     </div>
+
+                    {ticket.assigned_to && ticket.assigned_users && (
+                        <div className="mt-4 bg-green-50 rounded-xl p-4 border border-green-200">
+                            <p className="text-sm text-green-700">
+                                👤 Assigned to: <span className="font-semibold">{ticket.assigned_users?.name}</span>
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Comments Section */}
@@ -229,11 +309,17 @@ const TicketDetail = () => {
                     ) : (
                         <div className="space-y-4">
                             {comments.map((comment) => (
-                                <div key={comment.id} className="bg-nexa-light rounded-xl p-4">
+                                <div key={comment.id} className={`rounded-xl p-4 ${comment.user_id === user?.id ? 'bg-blue-50 border border-blue-200' : 'bg-nexa-light'}`}>
                                     <div className="flex justify-between items-start">
                                         <div>
                                             <span className="font-semibold text-nexa-primary">
                                                 {comment.users?.name || 'Unknown'}
+                                                {comment.user_id === user?.id && (
+                                                    <span className="text-xs ml-2 text-nexa-accent">(You)</span>
+                                                )}
+                                                {isAdmin && comment.user_id !== user?.id && (
+                                                    <span className="text-xs ml-2 text-orange-500">(Client)</span>
+                                                )}
                                             </span>
                                             <span className="text-sm text-nexa-gray ml-2">
                                                 {new Date(comment.created_at).toLocaleString()}
