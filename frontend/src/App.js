@@ -5,6 +5,9 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import MyTickets from './pages/MyTickets';
+import CreateTicket from './pages/CreateTicket';
+import TicketDetail from './pages/TicketDetail';
 
 // Import logo
 import logo from './assets/logo.png';
@@ -23,6 +26,7 @@ function Navbar() {
                 <div className="flex items-center space-x-4">
                     {isAuthenticated ? (
                         <>
+                            <Link to="/my-tickets" className="text-nexa-primary hover:text-nexa-accent font-medium">My Tickets</Link>
                             <span className="text-nexa-gray">Welcome, {user?.name}</span>
                             <button
                                 onClick={logout}
@@ -94,6 +98,30 @@ function App() {
                     <Route path="/dashboard" element={
                         <ProtectedRoute>
                             <Dashboard />
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/my-tickets" element={
+                        <ProtectedRoute>
+                            <>
+                                <Navbar />
+                                <MyTickets />
+                            </>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/create-ticket" element={
+                        <ProtectedRoute>
+                            <>
+                                <Navbar />
+                                <CreateTicket />
+                            </>
+                        </ProtectedRoute>
+                    } />
+                    <Route path="/tickets/:id" element={
+                        <ProtectedRoute>
+                            <>
+                                <Navbar />
+                                <TicketDetail />
+                            </>
                         </ProtectedRoute>
                     } />
                 </Routes>
