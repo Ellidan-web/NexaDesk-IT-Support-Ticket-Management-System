@@ -162,9 +162,30 @@ const logout = async (req, res) => {
     }
 };
 
+// Admin: Get all users
+const getAllUsers = async (req, res) => {
+    try {
+        const { data: users, error } = await supabaseAdmin
+            .from('users')
+            .select('id, name, email, role')
+            .order('name');
+
+        if (error) {
+            console.error('Get users error:', error);
+            return res.status(500).json({ error: 'Failed to get users' });
+        }
+
+        res.json({ users });
+    } catch (error) {
+        console.error('Get users error:', error);
+        res.status(500).json({ error: 'Failed to get users' });
+    }
+};
+
 module.exports = {
     register,
     login,
     getProfile,
-    logout
+    logout,
+    getAllUsers
 };
