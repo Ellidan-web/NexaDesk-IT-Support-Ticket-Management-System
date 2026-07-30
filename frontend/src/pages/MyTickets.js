@@ -1,3 +1,5 @@
+import { SkeletonTicketList } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import ticketService from '../services/ticketService';
@@ -42,16 +44,18 @@ const MyTickets = () => {
         return colors[priority] || 'bg-gray-100 text-gray-600';
     };
 
-    if (loading) {
-        return (
-            <div className="min-h-screen flex items-center justify-center">
-                <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-nexa-accent mx-auto"></div>
-                    <p className="mt-4 text-nexa-gray">Loading tickets...</p>
+if (loading) {
+    return (
+        <div className="min-h-screen bg-nexa-light pt-20">
+            <div className="container mx-auto px-4 py-12">
+                <div className="flex justify-between items-center mb-8">
+                    <h1 className="text-3xl font-bold text-nexa-primary">My Tickets</h1>
                 </div>
+                <SkeletonTicketList count={4} />
             </div>
-        );
-    }
+        </div>
+    );
+}
 
     return (
         <div className="min-h-screen bg-nexa-light pt-20">
@@ -68,17 +72,15 @@ const MyTickets = () => {
                         {error}
                     </div>
                 )}
-
                 {tickets.length === 0 ? (
-                    <div className="bg-white rounded-2xl shadow-xl p-12 text-center">
-                        <div className="text-6xl mb-4">🎫</div>
-                        <h3 className="text-xl font-semibold text-nexa-primary mb-2">No tickets yet</h3>
-                        <p className="text-nexa-gray mb-6">Create your first support ticket</p>
-                        <Link to="/create-ticket" className="btn-primary">
-                            Create Ticket
-                        </Link>
-                    </div>
-                ) : (
+                   <EmptyState 
+                    title="No tickets yet"
+                     message="Create your first support ticket to get help."
+                     buttonText="Create Ticket"
+                     buttonLink="/create-ticket"
+                    icon="🎫"
+                    />
+                 ) : (
                     <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                         <div className="overflow-x-auto">
                             <table className="w-full">
