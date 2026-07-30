@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -10,25 +11,27 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
-        setLoading(true);
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
+    setLoading(true);
 
-        const result = await login(email, password);
-        
-        if (result.success) {
-            // Redirect based on user role
-            if (result.user?.role === 'admin' || result.user?.role === 'staff') {
-                navigate('/admin');
-            } else {
-                navigate('/dashboard');
-            }
+    const result = await login(email, password);
+    
+    if (result.success) {
+        toast.success('Welcome back! 🎉');
+        // Redirect based on user role
+        if (result.user?.role === 'admin' || result.user?.role === 'staff') {
+            navigate('/admin');
         } else {
-            setError(result.error);
+            navigate('/dashboard');
         }
-        setLoading(false);
-    };
+    } else {
+        toast.error(result.error || 'Login failed');
+        setError(result.error);
+    }
+    setLoading(false);
+};
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-nexa-light py-12 px-4 sm:px-6 lg:px-8">

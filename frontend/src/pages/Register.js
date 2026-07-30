@@ -1,3 +1,4 @@
+import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
@@ -12,32 +13,36 @@ const Register = () => {
     const { register } = useAuth();
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        setError('');
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError('');
 
-        // Validate passwords match
-        if (password !== confirmPassword) {
-            setError('Passwords do not match');
-            return;
-        }
+    // Validate passwords match
+    if (password !== confirmPassword) {
+        toast.error('Passwords do not match');
+        setError('Passwords do not match');
+        return;
+    }
 
-        // Validate password length
-        if (password.length < 6) {
-            setError('Password must be at least 6 characters');
-            return;
-        }
+    // Validate password length
+    if (password.length < 6) {
+        toast.error('Password must be at least 6 characters');
+        setError('Password must be at least 6 characters');
+        return;
+    }
 
-        setLoading(true);
-        const result = await register(name, email, password);
-        
-        if (result.success) {
-            navigate('/dashboard');
-        } else {
-            setError(result.error);
-        }
-        setLoading(false);
-    };
+    setLoading(true);
+    const result = await register(name, email, password);
+    
+    if (result.success) {
+        toast.success('Account created successfully! 🎉');
+        navigate('/dashboard');
+    } else {
+        toast.error(result.error || 'Registration failed');
+        setError(result.error);
+    }
+    setLoading(false);
+};
 
     return (
         <div className="min-h-screen flex items-center justify-center bg-nexa-light py-12 px-4 sm:px-6 lg:px-8">
