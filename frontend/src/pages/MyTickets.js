@@ -19,30 +19,31 @@ const MyTickets = () => {
         loadTickets();
     }, []);
 
-    const loadTickets = async (page = 1) => {
-        setLoading(true);
-        try {
-            const response = await axios.get(`${process.env.REACT_APP_API_URL}/tickets/my`, {
-                headers: {
-                    Authorization: `Bearer ${localStorage.getItem('token')}`
-                },
-                params: {
-                    page: page,
-                    limit: itemsPerPage
-                }
-            });
-            
-            setTickets(response.data.tickets);
-            setTotalPages(response.data.pagination.totalPages);
-            setTotalItems(response.data.pagination.total);
-            setCurrentPage(page);
-            setError('');
-        } catch (err) {
-            setError('Failed to load tickets');
-            console.error(err);
-        }
-        setLoading(false);
-    };
+const loadTickets = async (page = 1) => {
+    setLoading(true);
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:5000/api/tickets/my`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: {
+                page: page,
+                limit: itemsPerPage
+            }
+        });
+        
+        setTickets(response.data.tickets);
+        setTotalPages(response.data.pagination.totalPages);
+        setTotalItems(response.data.pagination.total);
+        setCurrentPage(page);
+        setError('');
+    } catch (err) {
+        setError('Failed to load tickets');
+        console.error(err);
+    }
+    setLoading(false);
+};
 
     const getStatusColor = (status) => {
         const colors = {
