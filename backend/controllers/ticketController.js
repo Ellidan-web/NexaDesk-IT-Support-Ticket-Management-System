@@ -384,23 +384,17 @@ const addComment = async (req, res) => {
     }
 };
 
-// Admin: Get all tickets
+// Admin: Get all tickets with pagination
 const getAllTickets = async (req, res) => {
     try {
         const { status, priority, assignedTo } = req.query;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 10;
+        const offset = (page - 1) * limit;
 
-        // Start with base query
         let query = supabaseAdmin
             .from('tickets')
-            .select(`
-                *,
-                users:user_id (
-                    id,
-                    name,
-                    email
-                )
-            `)
-            .order('created_at', { ascending: false });
+            .select('*, users!tickets_user_id_fkey(id, name, email), assigned_users:users!tickets_assigned_to_fkey(id, name, email)', { count: 'exact' });
 
         // Apply filters
         if (status) {
@@ -413,14 +407,28 @@ const getAllTickets = async (req, res) => {
             query = query.eq('assigned_to', assignedTo);
         }
 
-        const { data: tickets, error } = await query;
+        const { data: tickets, error, count } = await query
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
 
         if (error) {
             console.error('Get all tickets error:', error);
-            return res.status(500).json({ error: 'Failed to get tickets', details: error.message });
+            return res.status(500).json({ error: 'Failed to get tickets' });
         }
 
-        res.json({ tickets });
+        const totalPages = Math.ceil(count / limit);
+
+        res.json({
+            tickets,
+            pagination: {
+                page,
+                limit,
+                total: count,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
+            }
+        });
 
     } catch (error) {
         console.error('Get all tickets error:', error);
