@@ -20,49 +20,52 @@ const AdminTickets = () => {
     });
 
     useEffect(() => {
-        loadAllTickets(1);
-    }, [filters.status, filters.priority]); // Re-fetch when filters change
+    loadAllTickets(1);
+}, []);
 
-    const loadAllTickets = async (page = 1) => {
-        setLoading(true);
-        try {
-            const token = localStorage.getItem('token');
-            const response = await axios.get(`http://localhost:5000/api/tickets/admin/all`, {
-                headers: {
-                    'Authorization': `Bearer ${token}`
-                },
-                params: {
-                    page: page,
-                    limit: itemsPerPage,
-                    status: filters.status || undefined,
-                    priority: filters.priority || undefined
-                }
-            });
-            
-            setTickets(response.data.tickets);
-            setTotalPages(response.data.pagination.totalPages);
-            setTotalItems(response.data.pagination.total);
-            setCurrentPage(page);
-            setError('');
-        } catch (err) {
-            setError('Failed to load tickets');
-            console.error(err);
-        }
-        setLoading(false);
-    };
-
-    const handleFilterChange = (e) => {
-        setFilters({
-            ...filters,
-            [e.target.name]: e.target.value
+const loadAllTickets = async (page = 1) => {
+    setLoading(true);
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.get(`http://localhost:5000/api/tickets/admin/all`, {
+            headers: {
+                'Authorization': `Bearer ${token}`
+            },
+            params: {
+                page: page,
+                limit: itemsPerPage,
+                status: filters.status || undefined,
+                priority: filters.priority || undefined
+            }
         });
-        setCurrentPage(1); // Reset to first page on filter change
-    };
+        
+        setTickets(response.data.tickets);
+        setTotalPages(response.data.pagination.totalPages);
+        setTotalItems(response.data.pagination.total);
+        setCurrentPage(page);
+        setError('');
+    } catch (err) {
+        setError('Failed to load tickets');
+        console.error(err);
+    }
+    setLoading(false);
+};
 
-    const clearFilters = () => {
-        setFilters({ status: '', priority: '' });
-        setCurrentPage(1);
-    };
+const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters(prev => ({
+        ...prev,
+        [name]: value
+    }));
+    // Reload tickets with new filters
+    loadAllTickets(1);
+};
+
+
+const clearFilters = () => {
+    setFilters({ status: '', priority: '' });
+    loadAllTickets(1);
+};
 
     const getStatusColor = (status) => {
         const colors = {
