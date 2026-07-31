@@ -1,25 +1,45 @@
-import { SkeletonTicketList } from '../components/Skeleton';
-import EmptyState from '../components/EmptyState';
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axios from 'axios'; 
 import ticketService from '../services/ticketService';
+import Pagination from '../components/Pagination';
+import { SkeletonTicketList } from '../components/Skeleton';
+import EmptyState from '../components/EmptyState';
 
 const MyTickets = () => {
     const [tickets, setTickets] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const itemsPerPage = 5;
 
     useEffect(() => {
         loadTickets();
     }, []);
 
-    const loadTickets = async () => {
+    const loadTickets = async (page = 1) => {
         setLoading(true);
-        const result = await ticketService.getUserTickets();
-        if (result.success) {
-            setTickets(result.data.tickets);
-        } else {
-            setError(result.error);
+        try {
+            const response = await axios.get(`${process.env.REACT_APP_API_URL}/tickets/my`, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('token')}`
+                },
+                params: {
+                    page: page,
+                    limit: itemsPerPage
+                }
+            });
+            
+            setTickets(response.data.tickets);
+            setTotalPages(response.data.pagination.totalPages);
+            setTotalItems(response.data.pagination.total);
+            setCurrentPage(page);
+            setError('');
+        } catch (err) {
+            setError('Failed to load tickets');
+            console.error(err);
         }
         setLoading(false);
     };
@@ -44,18 +64,18 @@ const MyTickets = () => {
         return colors[priority] || 'bg-gray-100 text-gray-600';
     };
 
-if (loading) {
-    return (
-        <div className="min-h-screen bg-nexa-light pt-20">
-            <div className="container mx-auto px-4 py-12">
-                <div className="flex justify-between items-center mb-8">
-                    <h1 className="text-3xl font-bold text-nexa-primary">My Tickets</h1>
+    if (loading) {
+        return (
+            <div className="min-h-screen bg-nexa-light pt-20">
+                <div className="container mx-auto px-4 py-12">
+                    <div className="flex justify-between items-center mb-8">
+                        <h1 className="text-3xl font-bold text-nexa-primary">My Tickets</h1>
+                    </div>
+                    <SkeletonTicketList count={4} />
                 </div>
-                <SkeletonTicketList count={4} />
             </div>
-        </div>
-    );
-}
+        );
+    }
 
     return (
         <div className="min-h-screen bg-nexa-light pt-20">
@@ -72,64 +92,76 @@ if (loading) {
                         {error}
                     </div>
                 )}
+
                 {tickets.length === 0 ? (
-                   <EmptyState 
-                    title="No tickets yet"
-                     message="Create your first support ticket to get help."
-                     buttonText="Create Ticket"
-                     buttonLink="/create-ticket"
-                    icon="🎫"
+                    <EmptyState 
+                        title="No tickets yet"
+                        message="Create your first support ticket to get help."
+                        buttonText="Create Ticket"
+                        buttonLink="/create-ticket"
+                        icon="🎫"
                     />
-                 ) : (
-                    <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
-                        <div className="overflow-x-auto">
-                            <table className="w-full">
-                                <thead className="bg-nexa-light">
-                                    <tr>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">ID</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Title</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Category</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Status</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Priority</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Created</th>
-                                        <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-gray-200">
-                                    {tickets.map((ticket) => (
-                                        <tr key={ticket.id} className="hover:bg-nexa-light transition-colors">
-                                            <td className="px-6 py-4 text-sm text-nexa-gray">#{ticket.id.slice(0, 8)}</td>
-                                            <td className="px-6 py-4 text-sm font-medium text-nexa-primary">
-                                                {ticket.title}
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-nexa-gray">{ticket.category}</td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 text-xs rounded-full font-medium ${getStatusColor(ticket.status)}`}>
-                                                    {ticket.status}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <span className={`px-2 py-1 text-xs rounded-full font-medium ${getPriorityColor(ticket.priority)}`}>
-                                                    {ticket.priority}
-                                                </span>
-                                            </td>
-                                            <td className="px-6 py-4 text-sm text-nexa-gray">
-                                                {new Date(ticket.created_at).toLocaleDateString()}
-                                            </td>
-                                            <td className="px-6 py-4">
-                                                <Link
-                                                    to={`/tickets/${ticket.id}`}
-                                                    className="text-nexa-accent hover:text-nexa-accent-light font-medium text-sm"
-                                                >
-                                                    View
-                                                </Link>
-                                            </td>
+                ) : (
+                    <>
+                        <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                            <div className="overflow-x-auto">
+                                <table className="w-full">
+                                    <thead className="bg-nexa-light">
+                                        <tr>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">ID</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Title</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Category</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Priority</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Created</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Action</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody className="divide-y divide-gray-200">
+                                        {tickets.map((ticket) => (
+                                            <tr key={ticket.id} className="hover:bg-nexa-light transition-colors">
+                                                <td className="px-6 py-4 text-sm text-nexa-gray">#{ticket.id.slice(0, 8)}</td>
+                                                <td className="px-6 py-4 text-sm font-medium text-nexa-primary">
+                                                    {ticket.title}
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-nexa-gray">{ticket.category}</td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${getStatusColor(ticket.status)}`}>
+                                                        {ticket.status}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <span className={`px-2 py-1 text-xs rounded-full font-medium ${getPriorityColor(ticket.priority)}`}>
+                                                        {ticket.priority}
+                                                    </span>
+                                                </td>
+                                                <td className="px-6 py-4 text-sm text-nexa-gray">
+                                                    {new Date(ticket.created_at).toLocaleDateString()}
+                                                </td>
+                                                <td className="px-6 py-4">
+                                                    <Link
+                                                        to={`/tickets/${ticket.id}`}
+                                                        className="text-nexa-accent hover:text-nexa-accent-light font-medium text-sm"
+                                                    >
+                                                        View
+                                                    </Link>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
-                    </div>
+
+                        {/* Pagination - MOVED INSIDE the return */}
+                        <Pagination
+                            currentPage={currentPage}
+                            totalPages={totalPages}
+                            totalItems={totalItems}
+                            itemsPerPage={itemsPerPage}
+                            onPageChange={loadTickets}
+                        />
+                    </>
                 )}
             </div>
         </div>
