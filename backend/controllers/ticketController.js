@@ -56,23 +56,51 @@ const createTicket = async (req, res) => {
     }
 };
 
-// Get user's tickets
+// Get user's tickets with pagination
 const getUserTickets = async (req, res) => {
     try {
         const userId = req.user.id;
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5;
+        const offset = (page - 1) * limit;
 
+        // Get total count
+        const { count, error: countError } = await supabaseAdmin
+            .from('tickets')
+            .select('*', { count: 'exact', head: true })
+            .eq('user_id', userId);
+
+        if (countError) {
+            console.error('Count error:', countError);
+            return res.status(500).json({ error: 'Failed to get ticket count' });
+        }
+
+        // Get paginated tickets
         const { data: tickets, error } = await supabaseAdmin
             .from('tickets')
             .select('*')
             .eq('user_id', userId)
-            .order('created_at', { ascending: false });
+            .order('created_at', { ascending: false })
+            .range(offset, offset + limit - 1);
 
         if (error) {
             console.error('Get tickets error:', error);
             return res.status(500).json({ error: 'Failed to get tickets' });
         }
 
-        res.json({ tickets });
+        const totalPages = Math.ceil(count / limit);
+
+        res.json({
+            tickets,
+            pagination: {
+                page,
+                limit,
+                total: count,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
+            }
+        });
 
     } catch (error) {
         console.error('Get tickets error:', error);
