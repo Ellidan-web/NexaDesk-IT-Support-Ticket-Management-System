@@ -72,7 +72,7 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 ---
 
 ### Ticket History & Activity Log
-![Ticket History](screenshots/admin-history.JPG)
+![Ticket History](screenshots/history.JPG)
 
 *Complete audit trail showing all actions: ticket creation, status changes, comments, and assignments.*
 
