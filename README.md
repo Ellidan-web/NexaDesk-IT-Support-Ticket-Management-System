@@ -10,9 +10,10 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 
 ---
 
-### Login & Register
-![Login](screenshots/login.JPG)
-![Register](screenshots/register.JPG)
+### Authentication
+| Login | Register |
+|-------|----------|
+| ![Login](screenshots/login.JPG) | ![Register](screenshots/register.JPG) |
 
 ---
 
@@ -22,17 +23,17 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 ---
 
 ### Create Ticket
-![Create Ticket](screenshots/create-ticket.JPG)
+![Create Ticket](screenshots/create-tickets.JPG)
 
 ---
 
-### My Tickets
-![My Tickets](screenshots/my-tickets.JPG)
+### My Tickets (User View)
+![My Tickets](screenshots/admin-own-ticket.JPG)
 
 ---
 
-### Ticket Detail
-![Ticket Detail](screenshots/detailed-ticket.JPG)
+### Ticket Detail - User View
+![User Ticket Detail](screenshots/user-ticker-detailed-comment.JPG)
 
 ---
 
@@ -41,26 +42,32 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 
 ---
 
-### Admin Tickets
-![Admin Tickets 1](screenshots/admin-tickets.JPG)
+### Admin - All Tickets
+![Admin All Tickets](screenshots/admin-alltickets.JPG)
 
 ---
 
-## History
-![Histoy](screenshots/admin-history.JPG)
+### Admin - View All Tickets
+![Admin View Tickets](screenshots/admin-view-tickets.JPG)
 
 ---
+
+### Admin - Ticket Detail with Comment
+![Admin Comment](screenshots/admin-ticket-detail-comment.JPG)
+
+---
+
+## Communication Flow
 
 ### Admin View - Managing a Ticket
-![Admin Comment](screenshots/admin-comment.JPG)
+![Admin Comment](screenshots/admin-ticket-detail-comment.JPG)
 
 *Admin can view ticket details, change status/priority, assign to team members, and add comments.*
 
 ### User View - Ticket Communication
-![User Comment](screenshots/user-comment.JPG)
+![User Comment](screenshots/user-ticker-detailed-comment.JPG)
 
 *Users can see admin responses and reply to comments, creating a complete communication loop.*
-
 ## Features
 
 - Secure JWT authentication

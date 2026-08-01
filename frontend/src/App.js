@@ -22,7 +22,10 @@ function Navbar() {
     return (
         <nav className="bg-[#0F172A] border-b border-[#334155] fixed top-0 left-0 right-0 z-50">
             <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-                <Link to="/" className="flex items-center space-x-3">
+                <Link
+                    to={isAuthenticated ? (user?.role === 'admin' ? '/admin' : '/dashboard') : '/'}
+                    className="flex items-center space-x-3"
+                >
                     <img src={logo} alt="NexaDesk" className="h-10 w-auto" />
                     <span className="text-2xl font-bold text-[#F8FAFC]">Nexa<span className="text-nexa-accent">Desk</span></span>
                 </Link>
