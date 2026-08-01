@@ -28,7 +28,7 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 ---
 
 ### My Tickets (User View)
-![My Tickets](screenshots/admin-own-ticket.JPG)
+![My Tickets](screenshots/user-mytickets.JPG)
 
 ---
 
@@ -42,8 +42,8 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 
 ---
 
-### Admin - All Tickets
-![Admin All Tickets](screenshots/admin-alltickets.JPG)
+### Admin - Own Tickets
+![Admin All Tickets](screenshots/admin-own-ticket.JPG)
 
 ---
 
