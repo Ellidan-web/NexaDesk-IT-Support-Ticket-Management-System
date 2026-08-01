@@ -10,7 +10,7 @@
   }
   
   body {
-    @apply bg-nexa-light text-nexa-primary antialiased;
+    @apply bg-[#0F172A] text-[#F8FAFC] antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 
@@ -28,7 +28,7 @@
   }
   
   .btn-secondary {
-    @apply px-6 py-3 bg-white text-nexa-primary rounded-lg font-semibold 
+    @apply px-6 py-3 bg-[#1E293B] text-[#F8FAFC] rounded-lg font-semibold 
            border-2 border-nexa-primary/10 hover:border-nexa-accent 
            hover:bg-nexa-accent/5 hover:scale-105 
            transition-all duration-300;
@@ -41,19 +41,19 @@
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-xl hover:shadow-2xl 
+    @apply bg-[#1E293B] rounded-2xl shadow-xl hover:shadow-2xl 
            transition-all duration-300 p-8 
            hover:-translate-y-2 hover:shadow-nexa-accent/10
-           border border-gray-100/50 backdrop-blur-sm;
+           border border-[#334155]/50;
   }
 
   .section-title {
     @apply text-4xl md:text-5xl lg:text-6xl font-extrabold 
-           text-nexa-primary leading-tight;
+           text-[#F8FAFC] leading-tight;
   }
 
   .section-subtitle {
-    @apply text-xl text-nexa-gray max-w-2xl mx-auto leading-relaxed;
+    @apply text-xl text-[#94A3B8] max-w-2xl mx-auto leading-relaxed;
   }
 
   .gradient-text {
@@ -62,7 +62,7 @@
   }
 
   .glass-effect {
-    @apply bg-white/80 backdrop-blur-sm border border-white/20;
+    @apply bg-[#1E293B]/80 backdrop-blur-sm border border-[#334155]/20;
   }
 }
 
@@ -81,66 +81,51 @@
   }
 }
 
-/* Dark Mode Styles - MOVED OUTSIDE the @layer utilities */
-.dark {
-    background-color: #0F172A;
-    color: #F8FAFC;
+/* Dark Mode Override - Force dark */
+.bg-white {
+  background-color: #1E293B !important;
 }
 
-.dark .bg-white {
-    background-color: #1E293B;
+.bg-nexa-light {
+  background-color: #0F172A !important;
 }
 
-.dark .bg-nexa-light {
-    background-color: #0F172A;
+.text-nexa-primary {
+  color: #F8FAFC !important;
 }
 
-.dark .text-nexa-primary {
-    color: #F8FAFC;
+.text-nexa-gray {
+  color: #94A3B8 !important;
 }
 
-.dark .text-nexa-gray {
-    color: #94A3B8;
+.border-gray-200 {
+  border-color: #334155 !important;
 }
 
-.dark .border-gray-200 {
-    border-color: #334155;
+.border-gray-300 {
+  border-color: #475569 !important;
 }
 
-.dark .border-gray-300 {
-    border-color: #475569;
+.bg-gray-50 {
+  background-color: #1E293B !important;
 }
 
-.dark .bg-gray-50 {
-    background-color: #1E293B;
+.shadow-xl {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5) !important;
 }
 
-.dark .shadow-xl {
-    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+.shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
 }
 
-.dark .shadow-md {
-    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+input,
+select,
+textarea {
+  background-color: #1E293B !important;
+  border-color: #475569 !important;
+  color: #F8FAFC !important;
 }
 
-.dark input,
-.dark select,
-.dark textarea {
-    background-color: #1E293B;
-    border-color: #475569;
-    color: #F8FAFC;
-}
-
-.dark input::placeholder {
-    color: #94A3B8;
-}
-
-.dark .btn-outline {
-    border-color: #475569;
-    color: #F8FAFC;
-}
-
-.dark .btn-outline:hover {
-    background-color: #3B82F6;
-    color: white;
+input::placeholder {
+  color: #94A3B8 !important;
 }
