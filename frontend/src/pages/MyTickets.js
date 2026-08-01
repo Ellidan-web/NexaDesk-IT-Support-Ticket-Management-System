@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import ticketService from '../services/ticketService';
 import Pagination from '../components/Pagination';
 import { SkeletonTicketList } from '../components/Skeleton';
 import EmptyState from '../components/EmptyState';
@@ -13,42 +12,83 @@ const MyTickets = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [sortBy, setSortBy] = useState('created_at');
-    const [sortOrder, setSortOrder] = useState('desc');
+    const [filters, setFilters] = useState({
+        search: '',
+        status: '',
+        priority: ''
+    });
     const itemsPerPage = 20;
 
-    useEffect(() => {
-        loadTickets();
-    }, []);
-
-    const loadTickets = async (page = 1) => {
+    const loadTickets = useCallback(async (page = 1) => {
         setLoading(true);
+        setError('');
         try {
             const token = localStorage.getItem('token');
+            const params = {
+                page,
+                limit: itemsPerPage,
+            };
+
+            // Only add non-empty filters
+            if (filters.search) params.search = filters.search;
+            if (filters.status) params.status = filters.status;
+            if (filters.priority) params.priority = filters.priority;
+
+            console.log('Loading tickets with params:', params); // Debug log
+
             const response = await axios.get(`http://localhost:5000/api/tickets/my`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
-                params: {
-                    page: page,
-                    limit: itemsPerPage,
-                    search: searchTerm || undefined,
-                    sortBy: sortBy,
-                    sortOrder: sortOrder
-                }
+                params
             });
 
-            setTickets(response.data.tickets);
-            setTotalPages(response.data.pagination.totalPages);
-            setTotalItems(response.data.pagination.total);
+            console.log('API Response:', response.data); // Debug log
+
+            setTickets(response.data.tickets || []);
+            setTotalPages(response.data.pagination?.totalPages || 1);
+            setTotalItems(response.data.pagination?.total || 0);
             setCurrentPage(page);
-            setError('');
         } catch (err) {
-            setError('Failed to load tickets');
-            console.error(err);
+            setError('Failed to load tickets. Please try again.');
+            console.error('Error loading tickets:', err);
+            setTickets([]);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
+    }, [filters]); // Keep filters in dependency
+
+    // Load tickets on initial mount and when filters change
+    useEffect(() => {
+        console.log('Filters changed, loading page 1 with filters:', filters);
+        loadTickets(1);
+    }, [loadTickets]);
+
+    const handleFilterChange = (e) => {
+        const { name, value } = e.target;
+        console.log('Filter changed:', name, value);
+        setFilters(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
+
+    const handleSearch = (e) => {
+        const value = e.target.value;
+        setFilters(prev => ({
+            ...prev,
+            search: value
+        }));
+    };
+
+    const handlePageChange = (page) => {
+        console.log('Page changed to:', page);
+        loadTickets(page);
+    };
+
+    const clearFilters = () => {
+        console.log('Clearing filters');
+        setFilters({ search: '', status: '', priority: '' });
     };
 
     const getStatusColor = (status) => {
@@ -89,61 +129,121 @@ const MyTickets = () => {
     return (
         <div className="min-h-screen bg-slate-900 pt-20">
             <div className="container mx-auto px-4 py-12">
-                {/* Header with Search */}
+                {/* Header */}
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h1 className="text-3xl font-bold text-white">My Tickets</h1>
-                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
-                        <div className="relative">
-                            <input
-                                type="text"
-                                placeholder="Search tickets..."
-                                value={searchTerm}
-                                onChange={(e) => {
-                                    setSearchTerm(e.target.value);
-                                    loadTickets(1);
-                                }}
-                                className="w-full sm:w-64 px-4 py-2 pl-10 bg-slate-800 border border-slate-700 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
-                            />
-                            <svg className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                            </svg>
+                    <Link to="/create-ticket" className="btn-primary text-center">
+                        + New Ticket
+                    </Link>
+                </div>
+
+                {/* Filters Section */}
+                <div className="bg-slate-800 rounded-2xl shadow-xl p-6 mb-8 border border-slate-700">
+                    <div className="grid md:grid-cols-3 gap-4">
+                        {/* Search */}
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Search</label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    name="search"
+                                    placeholder="Search tickets..."
+                                    value={filters.search}
+                                    onChange={handleSearch}
+                                    className="w-full px-4 py-2 pl-10 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                                />
+                                <svg className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
                         </div>
-                        <div className="relative">
+
+                        {/* Status Filter */}
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
                             <select
-                                value={`${sortBy}-${sortOrder}`}
-                                onChange={(e) => {
-                                    const [newSortBy, newSortOrder] = e.target.value.split('-');
-                                    setSortBy(newSortBy);
-                                    setSortOrder(newSortOrder);
-                                    loadTickets(1);
-                                }}
-                                className="w-full sm:w-48 px-4 py-2 bg-slate-800 border border-slate-700 rounded-lg text-white focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                                name="status"
+                                value={filters.status}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
                             >
-                                <option value="created_at-desc">Newest First</option>
-                                <option value="created_at-asc">Oldest First</option>
-                                <option value="priority-desc">Highest Priority</option>
-                                <option value="priority-asc">Lowest Priority</option>
-                                <option value="status-asc">Status Order</option>
+                                <option value="">All Status</option>
+                                <option value="OPEN">Open</option>
+                                <option value="IN_PROGRESS">In Progress</option>
+                                <option value="RESOLVED">Resolved</option>
+                                <option value="CLOSED">Closed</option>
                             </select>
                         </div>
-                        <Link to="/create-ticket" className="bg-nexa-accent hover:bg-nexa-accent-light text-white px-6 py-2 rounded-lg font-semibold transition-colors text-center">
-                            + New Ticket
-                        </Link>
+
+                        {/* Priority Filter */}
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Priority</label>
+                            <select
+                                name="priority"
+                                value={filters.priority}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                            >
+                                <option value="">All Priorities</option>
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HIGH">High</option>
+                                <option value="CRITICAL">Critical</option>
+                            </select>
+                        </div>
                     </div>
+
+                    {/* Active Filters Display & Clear Button */}
+                    {(filters.status || filters.priority || filters.search) && (
+                        <div className="mt-4 flex items-center gap-4">
+                            <button
+                                onClick={clearFilters}
+                                className="text-sm text-nexa-accent hover:text-nexa-accent-light hover:underline transition-colors"
+                            >
+                                Clear All Filters
+                            </button>
+                            <div className="flex flex-wrap gap-2">
+                                {filters.search && (
+                                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
+                                        Search: {filters.search}
+                                    </span>
+                                )}
+                                {filters.status && (
+                                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
+                                        Status: {filters.status.replace('_', ' ')}
+                                    </span>
+                                )}
+                                {filters.priority && (
+                                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
+                                        Priority: {filters.priority}
+                                    </span>
+                                )}
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6">
-                        {error}
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+                        <span>{error}</span>
+                        <button 
+                            onClick={() => loadTickets(currentPage)} 
+                            className="text-red-400 hover:text-red-300 underline text-sm"
+                        >
+                            Retry
+                        </button>
                     </div>
                 )}
 
                 {tickets.length === 0 ? (
-                    <EmptyState
-                        title="No tickets yet"
-                        message="Create your first support ticket to get help."
-                        buttonText="Create Ticket"
-                        buttonLink="/create-ticket"
+                    <EmptyState 
+                        title="No tickets found"
+                        message={filters.search || filters.status || filters.priority ? 
+                            "No tickets match your filters. Try adjusting your search criteria." : 
+                            "Create your first support ticket to get help."}
+                        buttonText={filters.search || filters.status || filters.priority ? "Clear Filters" : "Create Ticket"}
+                        buttonLink={filters.search || filters.status || filters.priority ? null : "/create-ticket"}
+                        onButtonClick={filters.search || filters.status || filters.priority ? clearFilters : null}
                         icon="🎫"
                     />
                 ) : (
@@ -203,7 +303,7 @@ const MyTickets = () => {
                             totalPages={totalPages}
                             totalItems={totalItems}
                             itemsPerPage={itemsPerPage}
-                            onPageChange={loadTickets}
+                            onPageChange={handlePageChange}
                         />
                     </>
                 )}

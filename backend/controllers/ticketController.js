@@ -56,7 +56,7 @@ const createTicket = async (req, res) => {
     }
 };
 
-// Get user's tickets with pagination and search
+// Get user's tickets with pagination, search, and sort
 const getUserTickets = async (req, res) => {
     try {
         const userId = req.user.id;
@@ -64,6 +64,10 @@ const getUserTickets = async (req, res) => {
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
         const search = req.query.search || '';
+        const status = req.query.status || '';
+        const priority = req.query.priority || '';
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortOrder = req.query.sortOrder || 'desc';
 
         // Build query
         let query = supabaseAdmin
@@ -76,6 +80,16 @@ const getUserTickets = async (req, res) => {
             query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
         }
 
+        // Add status filter
+        if (status) {
+            query = query.eq('status', status);
+        }
+
+        // Add priority filter
+        if (priority) {
+            query = query.eq('priority', priority);
+        }
+
         // Get total count
         const { count, error: countError } = await query;
 
@@ -84,9 +98,9 @@ const getUserTickets = async (req, res) => {
             return res.status(500).json({ error: 'Failed to get ticket count' });
         }
 
-        // Get paginated tickets
+        // Get paginated tickets with sorting
         const { data: tickets, error } = await query
-            .order('created_at', { ascending: false })
+            .order(sortBy, { ascending: sortOrder === 'asc' })
             .range(offset, offset + limit - 1);
 
         if (error) {
@@ -390,13 +404,15 @@ const addComment = async (req, res) => {
     }
 };
 
-// Admin: Get all tickets with pagination
+// Admin: Get all tickets with pagination, filters, and sort
 const getAllTickets = async (req, res) => {
     try {
         const { status, priority, assignedTo } = req.query;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
+        const sortBy = req.query.sortBy || 'created_at';
+        const sortOrder = req.query.sortOrder || 'desc';
 
         let query = supabaseAdmin
             .from('tickets')
@@ -414,7 +430,7 @@ const getAllTickets = async (req, res) => {
         }
 
         const { data: tickets, error, count } = await query
-            .order('created_at', { ascending: false })
+            .order(sortBy, { ascending: sortOrder === 'asc' })
             .range(offset, offset + limit - 1);
 
         if (error) {

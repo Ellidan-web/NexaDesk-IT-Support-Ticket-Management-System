@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Pagination from '../components/Pagination';
@@ -16,40 +16,48 @@ const AdminTickets = () => {
     const itemsPerPage = 20;
     const [filters, setFilters] = useState({
         status: '',
-        priority: ''
+        priority: '',
+        search: ''
     });
 
-    useEffect(() => {
-        loadAllTickets(1);
-    }, []);
-
-    const loadAllTickets = async (page = 1) => {
+    const loadAllTickets = useCallback(async (page = 1) => {
         setLoading(true);
+        setError('');
         try {
             const token = localStorage.getItem('token');
+            const params = {
+                page,
+                limit: itemsPerPage,
+            };
+
+            // Only add non-empty filters
+            if (filters.status) params.status = filters.status;
+            if (filters.priority) params.priority = filters.priority;
+            if (filters.search) params.search = filters.search;
+
             const response = await axios.get(`http://localhost:5000/api/tickets/admin/all`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
-                params: {
-                    page: page,
-                    limit: itemsPerPage,
-                    status: filters.status || undefined,
-                    priority: filters.priority || undefined
-                }
+                params
             });
 
-            setTickets(response.data.tickets);
-            setTotalPages(response.data.pagination.totalPages);
-            setTotalItems(response.data.pagination.total);
+            setTickets(response.data.tickets || []);
+            setTotalPages(response.data.pagination?.totalPages || 1);
+            setTotalItems(response.data.pagination?.total || 0);
             setCurrentPage(page);
-            setError('');
         } catch (err) {
-            setError('Failed to load tickets');
-            console.error(err);
+            setError('Failed to load tickets. Please try again.');
+            console.error('Error loading tickets:', err);
+            setTickets([]);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
-    };
+    }, [filters]);
+
+    useEffect(() => {
+        loadAllTickets(1);
+    }, [loadAllTickets]);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -57,12 +65,10 @@ const AdminTickets = () => {
             ...prev,
             [name]: value
         }));
-        loadAllTickets(1);
     };
 
     const clearFilters = () => {
-        setFilters({ status: '', priority: '' });
-        loadAllTickets(1);
+        setFilters({ status: '', priority: '', search: '' });
     };
 
     const getStatusColor = (status) => {
@@ -111,16 +117,41 @@ const AdminTickets = () => {
                 </div>
 
                 {error && (
-                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6">
-                        {error}
+                    <div className="bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-3 rounded-lg mb-6 flex justify-between items-center">
+                        <span>{error}</span>
+                        <button 
+                            onClick={() => loadAllTickets(currentPage)} 
+                            className="text-red-400 hover:text-red-300 underline text-sm"
+                        >
+                            Retry
+                        </button>
                     </div>
                 )}
 
-                {/* Filters - Dark Theme */}
+                {/* Filters - Enhanced Dark Theme */}
                 <div className="bg-slate-800 rounded-2xl shadow-xl p-6 mb-8 border border-slate-700">
-                    <div className="grid md:grid-cols-2 gap-4">
+                    <div className="grid md:grid-cols-3 gap-4">
+                        {/* Search Filter */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1">Filter by Status</label>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Search</label>
+                            <div className="relative">
+                                <input
+                                    type="text"
+                                    name="search"
+                                    placeholder="Search tickets..."
+                                    value={filters.search}
+                                    onChange={handleFilterChange}
+                                    className="w-full px-4 py-2 pl-10 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                                />
+                                <svg className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                        </div>
+
+                        {/* Status Filter */}
+                        <div>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
                             <select
                                 name="status"
                                 value={filters.status}
@@ -134,39 +165,72 @@ const AdminTickets = () => {
                                 <option value="CLOSED">Closed</option>
                             </select>
                         </div>
+
+                        {/* Priority Filter */}
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-1">Filter by Priority</label>
+                            <label className="block text-sm font-medium text-slate-300 mb-2">Priority</label>
                             <select
-                                value={`${sortBy}-${sortOrder}`}
-                                onChange={(e) => {
-                                    const [newSortBy, newSortOrder] = e.target.value.split('-');
-                                    setSortBy(newSortBy);
-                                    setSortOrder(newSortOrder);
-                                    loadAllTickets(1);
-                                }}
-                                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                                name="priority"
+                                value={filters.priority}
+                                onChange={handleFilterChange}
+                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
                             >
-                                <option value="created_at-desc">📅 Newest First</option>
-                                <option value="created_at-asc">📅 Oldest First</option>
-                                <option value="priority-desc">⚠️ Highest Priority</option>
-                                <option value="priority-asc">⚠️ Lowest Priority</option>
-                                <option value="status-asc">📊 Status Order</option>
+                                <option value="">All Priorities</option>
+                                <option value="LOW">Low</option>
+                                <option value="MEDIUM">Medium</option>
+                                <option value="HIGH">High</option>
+                                <option value="CRITICAL">Critical</option>
                             </select>
                         </div>
                     </div>
-                    <button
-                        onClick={clearFilters}
-                        className="mt-4 text-sm text-nexa-accent hover:text-nexa-accent-light hover:underline"
-                    >
-                        Clear Filters
-                    </button>
+
+                    {/* Active Filters & Clear Button */}
+                    <div className="mt-4 flex items-center justify-between">
+                        <button
+                            onClick={clearFilters}
+                            className="text-sm text-nexa-accent hover:text-nexa-accent-light hover:underline transition-colors"
+                        >
+                            Clear All Filters
+                        </button>
+                        {(filters.status || filters.priority || filters.search) && (
+                            <div className="flex flex-wrap gap-2">
+                                {filters.search && (
+                                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
+                                        Search: {filters.search}
+                                    </span>
+                                )}
+                                {filters.status && (
+                                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
+                                        Status: {filters.status.replace('_', ' ')}
+                                    </span>
+                                )}
+                                {filters.priority && (
+                                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
+                                        Priority: {filters.priority}
+                                    </span>
+                                )}
+                            </div>
+                        )}
+                    </div>
                 </div>
 
-                {/* Tickets Table - Dark Theme */}
+                {/* Tickets Table */}
                 <div className="bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-700">
                     {tickets.length === 0 ? (
                         <div className="text-center py-12">
-                            <p className="text-slate-400">No tickets found</p>
+                            <p className="text-slate-400 text-lg">
+                                {filters.status || filters.priority || filters.search ? 
+                                    'No tickets match your filters' : 
+                                    'No tickets found'}
+                            </p>
+                            {(filters.status || filters.priority || filters.search) && (
+                                <button
+                                    onClick={clearFilters}
+                                    className="mt-2 text-nexa-accent hover:text-nexa-accent-light hover:underline"
+                                >
+                                    Clear filters to see all tickets
+                                </button>
+                            )}
                         </div>
                     ) : (
                         <>
