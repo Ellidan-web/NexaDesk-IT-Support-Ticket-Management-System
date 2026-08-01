@@ -80,3 +80,67 @@
     animation-delay: 0.4s;
   }
 }
+
+/* Dark Mode Styles - MOVED OUTSIDE the @layer utilities */
+.dark {
+    background-color: #0F172A;
+    color: #F8FAFC;
+}
+
+.dark .bg-white {
+    background-color: #1E293B;
+}
+
+.dark .bg-nexa-light {
+    background-color: #0F172A;
+}
+
+.dark .text-nexa-primary {
+    color: #F8FAFC;
+}
+
+.dark .text-nexa-gray {
+    color: #94A3B8;
+}
+
+.dark .border-gray-200 {
+    border-color: #334155;
+}
+
+.dark .border-gray-300 {
+    border-color: #475569;
+}
+
+.dark .bg-gray-50 {
+    background-color: #1E293B;
+}
+
+.dark .shadow-xl {
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.dark .shadow-md {
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5);
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+    background-color: #1E293B;
+    border-color: #475569;
+    color: #F8FAFC;
+}
+
+.dark input::placeholder {
+    color: #94A3B8;
+}
+
+.dark .btn-outline {
+    border-color: #475569;
+    color: #F8FAFC;
+}
+
+.dark .btn-outline:hover {
+    background-color: #3B82F6;
+    color: white;
+}
