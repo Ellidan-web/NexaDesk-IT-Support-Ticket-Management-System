@@ -13,37 +13,39 @@ const MyTickets = () => {
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
+    const [searchTerm, setSearchTerm] = useState('');
     const itemsPerPage = 5;
 
     useEffect(() => {
         loadTickets();
     }, []);
 
-const loadTickets = async (page = 1) => {
-    setLoading(true);
-    try {
-        const token = localStorage.getItem('token');
-        const response = await axios.get(`http://localhost:5000/api/tickets/my`, {
-            headers: {
-                'Authorization': `Bearer ${token}`
-            },
-            params: {
-                page: page,
-                limit: itemsPerPage
-            }
-        });
-        
-        setTickets(response.data.tickets);
-        setTotalPages(response.data.pagination.totalPages);
-        setTotalItems(response.data.pagination.total);
-        setCurrentPage(page);
-        setError('');
-    } catch (err) {
-        setError('Failed to load tickets');
-        console.error(err);
-    }
-    setLoading(false);
-};
+    const loadTickets = async (page = 1) => {
+        setLoading(true);
+        try {
+            const token = localStorage.getItem('token');
+            const response = await axios.get(`http://localhost:5000/api/tickets/my`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                },
+                params: {
+                    page: page,
+                    limit: itemsPerPage,
+                    search: searchTerm || undefined
+                }
+            });
+            
+            setTickets(response.data.tickets);
+            setTotalPages(response.data.pagination.totalPages);
+            setTotalItems(response.data.pagination.total);
+            setCurrentPage(page);
+            setError('');
+        } catch (err) {
+            setError('Failed to load tickets');
+            console.error(err);
+        }
+        setLoading(false);
+    };
 
     const getStatusColor = (status) => {
         const colors = {
@@ -81,11 +83,28 @@ const loadTickets = async (page = 1) => {
     return (
         <div className="min-h-screen bg-nexa-light pt-20">
             <div className="container mx-auto px-4 py-12">
-                <div className="flex justify-between items-center mb-8">
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
                     <h1 className="text-3xl font-bold text-nexa-primary">My Tickets</h1>
-                    <Link to="/create-ticket" className="btn-primary">
-                        + New Ticket
-                    </Link>
+                    <div className="flex flex-col sm:flex-row gap-3 w-full sm:w-auto">
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search tickets..."
+                                value={searchTerm}
+                                onChange={(e) => {
+                                    setSearchTerm(e.target.value);
+                                    loadTickets(1);
+                                }}
+                                className="w-full sm:w-64 px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                            />
+                            <svg className="absolute left-3 top-2.5 h-5 w-5 text-nexa-gray" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                        </div>
+                        <Link to="/create-ticket" className="btn-primary text-center">
+                            + New Ticket
+                        </Link>
+                    </div>
                 </div>
 
                 {error && (
@@ -154,7 +173,6 @@ const loadTickets = async (page = 1) => {
                             </div>
                         </div>
 
-                        {/* Pagination - MOVED INSIDE the return */}
                         <Pagination
                             currentPage={currentPage}
                             totalPages={totalPages}
