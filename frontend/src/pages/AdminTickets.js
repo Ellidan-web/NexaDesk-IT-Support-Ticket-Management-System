@@ -137,16 +137,20 @@ const AdminTickets = () => {
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-1">Filter by Priority</label>
                             <select
-                                name="priority"
-                                value={filters.priority}
-                                onChange={handleFilterChange}
-                                className="w-full px-3 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                                value={`${sortBy}-${sortOrder}`}
+                                onChange={(e) => {
+                                    const [newSortBy, newSortOrder] = e.target.value.split('-');
+                                    setSortBy(newSortBy);
+                                    setSortOrder(newSortOrder);
+                                    loadAllTickets(1);
+                                }}
+                                className="px-4 py-2 bg-slate-700 border border-slate-600 rounded-lg text-white focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
                             >
-                                <option value="">All Priorities</option>
-                                <option value="LOW">Low</option>
-                                <option value="MEDIUM">Medium</option>
-                                <option value="HIGH">High</option>
-                                <option value="CRITICAL">Critical</option>
+                                <option value="created_at-desc">📅 Newest First</option>
+                                <option value="created_at-asc">📅 Oldest First</option>
+                                <option value="priority-desc">⚠️ Highest Priority</option>
+                                <option value="priority-asc">⚠️ Lowest Priority</option>
+                                <option value="status-asc">📊 Status Order</option>
                             </select>
                         </div>
                     </div>
