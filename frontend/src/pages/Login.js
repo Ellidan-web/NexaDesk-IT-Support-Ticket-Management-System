@@ -1,7 +1,7 @@
-import toast from 'react-hot-toast';
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
+import toast from 'react-hot-toast';
 
 const Login = () => {
     const [email, setEmail] = useState('');
@@ -11,36 +11,35 @@ const Login = () => {
     const { login } = useAuth();
     const navigate = useNavigate();
 
-const handleSubmit = async (e) => {
-    e.preventDefault();
-    setError('');
-    setLoading(true);
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setError('');
+        setLoading(true);
 
-    const result = await login(email, password);
-    
-    if (result.success) {
-        toast.success('Welcome back! 🎉');
-        // Redirect based on user role
-        if (result.user?.role === 'admin' || result.user?.role === 'staff') {
-            navigate('/admin');
+        const result = await login(email, password);
+        
+        if (result.success) {
+            toast.success('Welcome back! 🎉');
+            if (result.user?.role === 'admin' || result.user?.role === 'staff') {
+                navigate('/admin');
+            } else {
+                navigate('/dashboard');
+            }
         } else {
-            navigate('/dashboard');
+            toast.error(result.error || 'Login failed');
+            setError(result.error);
         }
-    } else {
-        toast.error(result.error || 'Login failed');
-        setError(result.error);
-    }
-    setLoading(false);
-};
+        setLoading(false);
+    };
 
     return (
-        <div className="min-h-screen flex items-center justify-center bg-nexa-light py-12 px-4 sm:px-6 lg:px-8">
-            <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl">
+        <div className="min-h-screen flex items-center justify-center bg-[#0F172A] py-12 px-4">
+            <div className="max-w-md w-full bg-[#1E293B] p-8 rounded-2xl shadow-xl border border-[#334155]">
                 <div>
-                    <h2 className="text-center text-3xl font-extrabold text-nexa-primary">
+                    <h2 className="text-center text-3xl font-extrabold text-[#F8FAFC]">
                         Sign in to NexaDesk
                     </h2>
-                    <p className="mt-2 text-center text-sm text-nexa-gray">
+                    <p className="mt-2 text-center text-sm text-[#94A3B8]">
                         Or{' '}
                         <Link to="/register" className="font-medium text-nexa-accent hover:text-nexa-accent-light">
                             create a new account
@@ -49,7 +48,7 @@ const handleSubmit = async (e) => {
                 </div>
 
                 {error && (
-                    <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                    <div className="mt-4 bg-red-900/50 border border-red-700 text-red-300 px-4 py-3 rounded-lg text-sm">
                         {error}
                     </div>
                 )}
@@ -57,7 +56,7 @@ const handleSubmit = async (e) => {
                 <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
                     <div className="space-y-4">
                         <div>
-                            <label htmlFor="email" className="block text-sm font-medium text-nexa-primary">
+                            <label htmlFor="email" className="block text-sm font-medium text-[#94A3B8]">
                                 Email address
                             </label>
                             <input
@@ -66,12 +65,12 @@ const handleSubmit = async (e) => {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                                className="mt-1 block w-full px-3 py-2 bg-[#0F172A] border border-[#475569] rounded-lg shadow-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
                                 placeholder="you@example.com"
                             />
                         </div>
                         <div>
-                            <label htmlFor="password" className="block text-sm font-medium text-nexa-primary">
+                            <label htmlFor="password" className="block text-sm font-medium text-[#94A3B8]">
                                 Password
                             </label>
                             <input
@@ -80,7 +79,7 @@ const handleSubmit = async (e) => {
                                 required
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
+                                className="mt-1 block w-full px-3 py-2 bg-[#0F172A] border border-[#475569] rounded-lg shadow-sm text-[#F8FAFC] placeholder-[#64748B] focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
                                 placeholder="••••••••"
                             />
                         </div>
@@ -89,7 +88,7 @@ const handleSubmit = async (e) => {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-nexa-accent hover:bg-nexa-accent-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nexa-accent disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-nexa-accent hover:bg-nexa-accent-light focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-nexa-accent disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
                     >
                         {loading ? 'Signing in...' : 'Sign in'}
                     </button>

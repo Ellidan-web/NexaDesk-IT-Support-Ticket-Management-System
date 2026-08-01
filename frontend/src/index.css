@@ -129,3 +129,66 @@ textarea {
 input::placeholder {
   color: #94A3B8 !important;
 }
+
+/* Table text colors for dark mode */
+.dark .text-nexa-primary,
+.dark .text-gray-900,
+.dark .text-nexa-gray {
+    color: #F8FAFC !important;
+}
+
+.dark .bg-white {
+    background-color: #1E293B !important;
+}
+
+.dark .hover\:bg-nexa-light:hover {
+    background-color: #334155 !important;
+}
+
+.dark .divide-y > * + * {
+    border-color: #334155 !important;
+}
+
+.dark .btn-outline {
+    border-color: #475569 !important;
+    color: #F8FAFC !important;
+}
+
+.dark .btn-outline:hover {
+    background-color: #3B82F6 !important;
+    color: white !important;
+}
+
+/* Force table text to be white in dark mode */
+.dark table td,
+.dark table th,
+.dark table span,
+.dark table a,
+.dark table p,
+.dark table div {
+    color: #F8FAFC !important;
+}
+
+.dark table td.text-nexa-gray,
+.dark table th.text-nexa-gray {
+    color: #94A3B8 !important;
+}
+
+/* FORCE DARK MODE TABLE TEXT */
+.dark table td,
+.dark table th {
+    color: #F8FAFC !important;
+}
+
+.dark table td.text-nexa-gray,
+.dark table th.text-nexa-gray {
+    color: #94A3B8 !important;
+}
+
+.dark table a {
+    color: #60A5FA !important;
+}
+
+.dark table a:hover {
+    color: #93BBFC !important;
+}

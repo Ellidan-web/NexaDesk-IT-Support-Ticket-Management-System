@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axios from 'axios'; 
+import axios from 'axios';
 import ticketService from '../services/ticketService';
 import Pagination from '../components/Pagination';
 import { SkeletonTicketList } from '../components/Skeleton';
@@ -34,7 +34,7 @@ const MyTickets = () => {
                     search: searchTerm || undefined
                 }
             });
-            
+
             setTickets(response.data.tickets);
             setTotalPages(response.data.pagination.totalPages);
             setTotalItems(response.data.pagination.total);
@@ -47,25 +47,25 @@ const MyTickets = () => {
         setLoading(false);
     };
 
-    const getStatusColor = (status) => {
-        const colors = {
-            'OPEN': 'bg-red-100 text-red-600',
-            'IN_PROGRESS': 'bg-yellow-100 text-yellow-600',
-            'RESOLVED': 'bg-green-100 text-green-600',
-            'CLOSED': 'bg-gray-100 text-gray-600'
-        };
-        return colors[status] || 'bg-gray-100 text-gray-600';
+const getStatusColor = (status) => {
+    const colors = {
+        'OPEN': 'bg-red-500/20 text-red-400 border border-red-500/30',
+        'IN_PROGRESS': 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+        'RESOLVED': 'bg-green-500/20 text-green-400 border border-green-500/30',
+        'CLOSED': 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
     };
+    return colors[status] || 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+};
 
-    const getPriorityColor = (priority) => {
-        const colors = {
-            'LOW': 'bg-blue-100 text-blue-600',
-            'MEDIUM': 'bg-yellow-100 text-yellow-600',
-            'HIGH': 'bg-orange-100 text-orange-600',
-            'CRITICAL': 'bg-red-100 text-red-600'
-        };
-        return colors[priority] || 'bg-gray-100 text-gray-600';
+const getPriorityColor = (priority) => {
+    const colors = {
+        'LOW': 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
+        'MEDIUM': 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
+        'HIGH': 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
+        'CRITICAL': 'bg-red-500/20 text-red-400 border border-red-500/30'
     };
+    return colors[priority] || 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+};
 
     if (loading) {
         return (
@@ -114,7 +114,7 @@ const MyTickets = () => {
                 )}
 
                 {tickets.length === 0 ? (
-                    <EmptyState 
+                    <EmptyState
                         title="No tickets yet"
                         message="Create your first support ticket to get help."
                         buttonText="Create Ticket"
@@ -126,25 +126,25 @@ const MyTickets = () => {
                         <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                             <div className="overflow-x-auto">
                                 <table className="w-full">
-                                    <thead className="bg-nexa-light">
+                                    <thead className="bg-nexa-light dark:bg-[#0F172A]">
                                         <tr>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">ID</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Title</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Category</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Status</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Priority</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Created</th>
-                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray uppercase tracking-wider">Action</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray dark:text-[#94A3B8] uppercase tracking-wider">ID</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray dark:text-[#94A3B8] uppercase tracking-wider">Title</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray dark:text-[#94A3B8] uppercase tracking-wider">Category</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray dark:text-[#94A3B8] uppercase tracking-wider">Status</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray dark:text-[#94A3B8] uppercase tracking-wider">Priority</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray dark:text-[#94A3B8] uppercase tracking-wider">Created</th>
+                                            <th className="px-6 py-3 text-left text-xs font-medium text-nexa-gray dark:text-[#94A3B8] uppercase tracking-wider">Action</th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-gray-200">
+                                    <tbody className="divide-y divide-gray-200 dark:divide-[#334155]">
                                         {tickets.map((ticket) => (
-                                            <tr key={ticket.id} className="hover:bg-nexa-light transition-colors">
-                                                <td className="px-6 py-4 text-sm text-nexa-gray">#{ticket.id.slice(0, 8)}</td>
-                                                <td className="px-6 py-4 text-sm font-medium text-nexa-primary">
+                                            <tr key={ticket.id} className="hover:bg-nexa-light dark:hover:bg-[#334155] transition-colors">
+                                                <td className="px-6 py-4 text-sm text-nexa-gray dark:text-[#94A3B8]">#{ticket.id.slice(0, 8)}</td>
+                                                <td className="px-6 py-4 text-sm font-medium text-nexa-primary dark:text-[#F8FAFC]">
                                                     {ticket.title}
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-nexa-gray">{ticket.category}</td>
+                                                <td className="px-6 py-4 text-sm text-nexa-gray dark:text-[#94A3B8]">{ticket.category}</td>
                                                 <td className="px-6 py-4">
                                                     <span className={`px-2 py-1 text-xs rounded-full font-medium ${getStatusColor(ticket.status)}`}>
                                                         {ticket.status}
@@ -155,13 +155,13 @@ const MyTickets = () => {
                                                         {ticket.priority}
                                                     </span>
                                                 </td>
-                                                <td className="px-6 py-4 text-sm text-nexa-gray">
+                                                <td className="px-6 py-4 text-sm text-nexa-gray dark:text-[#94A3B8]">
                                                     {new Date(ticket.created_at).toLocaleDateString()}
                                                 </td>
                                                 <td className="px-6 py-4">
                                                     <Link
                                                         to={`/tickets/${ticket.id}`}
-                                                        className="text-nexa-accent hover:text-nexa-accent-light font-medium text-sm"
+                                                        className="text-nexa-accent hover:text-nexa-accent-light dark:text-nexa-accent dark:hover:text-nexa-accent-light font-medium text-sm"
                                                     >
                                                         View
                                                     </Link>
