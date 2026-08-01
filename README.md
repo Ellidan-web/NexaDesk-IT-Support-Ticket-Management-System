@@ -46,6 +46,11 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 
 ---
 
+## History
+![Histoy](screenshots/admin-history.JPG)
+
+---
+
 ### Admin View - Managing a Ticket
 ![Admin Comment](screenshots/admin-comment.JPG)
 
