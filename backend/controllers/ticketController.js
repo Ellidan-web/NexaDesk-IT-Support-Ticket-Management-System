@@ -56,19 +56,28 @@ const createTicket = async (req, res) => {
     }
 };
 
-// Get user's tickets with pagination
+// Get user's tickets with pagination and search
 const getUserTickets = async (req, res) => {
     try {
         const userId = req.user.id;
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 5;
         const offset = (page - 1) * limit;
+        const search = req.query.search || '';
+
+        // Build query
+        let query = supabaseAdmin
+            .from('tickets')
+            .select('*', { count: 'exact' })
+            .eq('user_id', userId);
+
+        // Add search filter
+        if (search) {
+            query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+        }
 
         // Get total count
-        const { count, error: countError } = await supabaseAdmin
-            .from('tickets')
-            .select('*', { count: 'exact', head: true })
-            .eq('user_id', userId);
+        const { count, error: countError } = await query;
 
         if (countError) {
             console.error('Count error:', countError);
@@ -76,10 +85,7 @@ const getUserTickets = async (req, res) => {
         }
 
         // Get paginated tickets
-        const { data: tickets, error } = await supabaseAdmin
-            .from('tickets')
-            .select('*')
-            .eq('user_id', userId)
+        const { data: tickets, error } = await query
             .order('created_at', { ascending: false })
             .range(offset, offset + limit - 1);
 
