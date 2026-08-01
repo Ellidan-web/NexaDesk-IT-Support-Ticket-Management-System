@@ -68,6 +68,15 @@ A full-stack IT help desk application built with React, Node.js, Express, and Su
 ![User Comment](screenshots/user-ticker-detailed-comment.JPG)
 
 *Users can see admin responses and reply to comments, creating a complete communication loop.*
+
+---
+
+### Ticket History & Activity Log
+![Ticket History](screenshots/admin-history.JPG)
+
+*Complete audit trail showing all actions: ticket creation, status changes, comments, and assignments.*
+
+---
 ## Features
 
 - Secure JWT authentication
