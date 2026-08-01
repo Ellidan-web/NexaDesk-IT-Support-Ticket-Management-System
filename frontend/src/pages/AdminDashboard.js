@@ -4,24 +4,27 @@ import { useAuth } from '../context/AuthContext';
 import ticketService from '../services/ticketService';
 
 const getStatusColor = (status) => {
+    const statusUpper = status?.toString().toUpperCase().trim() || '';
     const colors = {
-        'OPEN': 'bg-red-500/20 text-red-400 border border-red-500/30',
-        'IN_PROGRESS': 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
-        'RESOLVED': 'bg-green-500/20 text-green-400 border border-green-500/30',
-        'CLOSED': 'bg-gray-500/20 text-gray-400 border border-gray-500/30'
+        'OPEN': 'bg-red-100 text-red-700 font-semibold',
+        'IN_PROGRESS': 'bg-yellow-100 text-yellow-700 font-semibold',
+        'RESOLVED': 'bg-green-100 text-green-700 font-semibold',
+        'CLOSED': 'bg-gray-100 text-gray-700 font-semibold'
     };
-    return colors[status] || 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+    return colors[statusUpper] || 'bg-gray-100 text-gray-500';
 };
 
 const getPriorityColor = (priority) => {
+    const priorityUpper = priority?.toString().toUpperCase().trim() || '';
     const colors = {
-        'LOW': 'bg-blue-500/20 text-blue-400 border border-blue-500/30',
-        'MEDIUM': 'bg-yellow-500/20 text-yellow-400 border border-yellow-500/30',
-        'HIGH': 'bg-orange-500/20 text-orange-400 border border-orange-500/30',
-        'CRITICAL': 'bg-red-500/20 text-red-400 border border-red-500/30'
+        'LOW': 'bg-blue-100 text-blue-700 font-semibold',
+        'MEDIUM': 'bg-yellow-100 text-yellow-700 font-semibold',
+        'HIGH': 'bg-orange-100 text-orange-700 font-semibold',
+        'CRITICAL': 'bg-red-100 text-red-700 font-semibold'
     };
-    return colors[priority] || 'bg-gray-500/20 text-gray-400 border border-gray-500/30';
+    return colors[priorityUpper] || 'bg-gray-100 text-gray-500';
 };
+
 
 const AdminDashboard = () => {
     const { user } = useAuth();

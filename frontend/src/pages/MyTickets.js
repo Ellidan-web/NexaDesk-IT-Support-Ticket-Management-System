@@ -14,7 +14,7 @@ const MyTickets = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [searchTerm, setSearchTerm] = useState('');
-    const itemsPerPage = 5;
+    const itemsPerPage = 20;
 
     useEffect(() => {
         loadTickets();

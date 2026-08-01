@@ -395,7 +395,7 @@ const getAllTickets = async (req, res) => {
     try {
         const { status, priority, assignedTo } = req.query;
         const page = parseInt(req.query.page) || 1;
-        const limit = parseInt(req.query.limit) || 10;
+        const limit = parseInt(req.query.limit) || 20;
         const offset = (page - 1) * limit;
 
         let query = supabaseAdmin
