@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import ticketService from '../services/ticketService';
+import toast from 'react-hot-toast';
 
 const TicketDetail = () => {
     const { id } = useParams();
@@ -53,11 +54,12 @@ const TicketDetail = () => {
         setSubmitting(true);
         const result = await ticketService.addComment(id, comment);
         if (result.success) {
+            toast.success('Comment added!');
             setComments([...comments, result.data.comment]);
             setComment('');
             await loadTicket();
         } else {
-            alert(result.error);
+            toast.error(result.error || 'Failed to add comment');
         }
         setSubmitting(false);
     };
@@ -68,10 +70,11 @@ const TicketDetail = () => {
         setUpdating(true);
         const result = await ticketService.updateStatus(id, newStatus);
         if (result.success) {
+            toast.success(`Status updated to ${newStatus}`);
             setTicket(result.data.ticket);
             await loadTicket();
         } else {
-            alert(result.error);
+            toast.error(result.error || 'Failed to update status');
         }
         setUpdating(false);
     };
@@ -82,10 +85,11 @@ const TicketDetail = () => {
         setUpdating(true);
         const result = await ticketService.updatePriority(id, newPriority);
         if (result.success) {
+            toast.success(`Priority updated to ${newPriority} ✅`);
             setTicket(result.data.ticket);
             await loadTicket();
         } else {
-            alert(result.error);
+            toast.error(result.error || 'Failed to update priority');
         }
         setUpdating(false);
     };
@@ -94,10 +98,11 @@ const TicketDetail = () => {
         setUpdating(true);
         const result = await ticketService.assignTicket(id, assignedTo);
         if (result.success) {
+            toast.success('Ticket assigned successfully! ✅');
             setTicket(result.data.ticket);
             await loadTicket();
         } else {
-            alert(result.error);
+            toast.error(result.error || 'Failed to assign ticket');
         }
         setUpdating(false);
     };
@@ -185,7 +190,7 @@ const TicketDetail = () => {
                                         <select
                                             value={ticket.status}
                                             onChange={(e) => handleStatusChange(e.target.value)}
-                                            className="px-3 py-1 rounded-full text-xs font-medium border-0 bg-[#1E293B] text-[#F8FAFC] border border-[#475569]"
+                                            className="px-3 py-1 rounded-full text-xs font-medium bg-[#1E293B] text-[#F8FAFC] border border-[#475569]"
                                             disabled={updating}
                                         >
                                             {statuses.map((s) => (
@@ -198,7 +203,7 @@ const TicketDetail = () => {
                                         <select
                                             value={ticket.priority}
                                             onChange={(e) => handlePriorityChange(e.target.value)}
-                                            className="px-3 py-1 rounded-full text-xs font-medium border-0 bg-[#1E293B] text-[#F8FAFC] border border-[#475569]"
+                                            className="px-3 py-1 rounded-full text-xs font-medium bg-[#1E293B] text-[#F8FAFC] border border-[#475569]"
                                             disabled={updating}
                                         >
                                             {priorities.map((p) => (
@@ -300,8 +305,8 @@ const TicketDetail = () => {
                         ) : (
                             comments.map((comment) => (
                                 <div key={comment.id} className={`rounded-xl p-4 ${comment.user_id === user?.id
-                                        ? 'bg-blue-900/20 border border-blue-500/30'
-                                        : 'bg-[#0F172A] border border-[#334155]'
+                                    ? 'bg-blue-900/20 border border-blue-500/30'
+                                    : 'bg-[#0F172A] border border-[#334155]'
                                     }`}>
                                     <div className="flex justify-between items-start">
                                         <div>
