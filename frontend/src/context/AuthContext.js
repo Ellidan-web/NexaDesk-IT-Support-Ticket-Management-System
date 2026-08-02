@@ -18,25 +18,37 @@ export const AuthProvider = ({ children }) => {
         axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
 
-    // Load user on mount
+    // Load user on mount - THIS RESTORES SESSION
     useEffect(() => {
         const loadUser = async () => {
-            if (token) {
-                try {
-                    const response = await axios.get(`${API_URL}/auth/profile`);
-                    setUser(response.data.user);
-                } catch (error) {
-                    console.error('Error loading user:', error);
-                    localStorage.removeItem('token');
-                    setToken(null);
-                    delete axios.defaults.headers.common['Authorization'];
-                }
+            const storedToken = localStorage.getItem('token');
+            
+            if (!storedToken) {
+                setLoading(false);
+                return;
+            }
+
+            try {
+                // Set token in axios headers
+                axios.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
+                setToken(storedToken);
+
+                // Get user profile
+                const response = await axios.get(`${API_URL}/auth/profile`);
+                setUser(response.data.user);
+            } catch (error) {
+                console.error('Error loading user:', error);
+                // If token is invalid, clear everything
+                localStorage.removeItem('token');
+                setToken(null);
+                delete axios.defaults.headers.common['Authorization'];
+                setUser(null);
             }
             setLoading(false);
         };
 
         loadUser();
-    }, [token]);
+    }, []);
 
     // Register user
     const register = async (name, email, password) => {
