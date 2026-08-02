@@ -413,10 +413,16 @@ const getAllTickets = async (req, res) => {
         const offset = (page - 1) * limit;
         const sortBy = req.query.sortBy || 'created_at';
         const sortOrder = req.query.sortOrder || 'desc';
+        const search = req.query.search || '';
 
         let query = supabaseAdmin
             .from('tickets')
             .select('*, users!tickets_user_id_fkey(id, name, email), assigned_users:users!tickets_assigned_to_fkey(id, name, email)', { count: 'exact' });
+
+        // Add search filter
+        if (search) {
+            query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+        }
 
         // Apply filters
         if (status) {
