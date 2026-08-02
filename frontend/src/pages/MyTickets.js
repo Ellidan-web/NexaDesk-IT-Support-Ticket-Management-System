@@ -14,7 +14,6 @@ const MyTickets = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [filters, setFilters] = useState({
-        search: '',
         status: '',
         priority: ''
     });
@@ -34,7 +33,6 @@ const MyTickets = () => {
                 sortOrder: sortOrder
             };
 
-            if (filters.search) params.search = filters.search;
             if (filters.status) params.status = filters.status;
             if (filters.priority) params.priority = filters.priority;
 
@@ -85,20 +83,12 @@ const MyTickets = () => {
         }));
     };
 
-    const handleSearch = (e) => {
-        const value = e.target.value;
-        setFilters(prev => ({
-            ...prev,
-            search: value
-        }));
-    };
-
     const handlePageChange = (page) => {
         loadTickets(page);
     };
 
     const clearFilters = () => {
-        setFilters({ search: '', status: '', priority: '' });
+        setFilters({ status: '', priority: '' });
     };
 
     const getStatusColor = (status) => {
@@ -147,24 +137,7 @@ const MyTickets = () => {
                 </div>
 
                 <div className="bg-slate-800 rounded-2xl shadow-xl p-6 mb-8 border border-slate-700">
-                    <div className="grid md:grid-cols-4 gap-4">
-                        <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">Search</label>
-                            <div className="relative">
-                                <input
-                                    type="text"
-                                    name="search"
-                                    placeholder="Search tickets..."
-                                    value={filters.search}
-                                    onChange={handleSearch}
-                                    className="w-full px-4 py-2 pl-10 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
-                                />
-                                <svg className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                </svg>
-                            </div>
-                        </div>
-
+                    <div className="grid md:grid-cols-3 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
                             <select
@@ -218,7 +191,7 @@ const MyTickets = () => {
                         </div>
                     </div>
 
-                    {(filters.status || filters.priority || filters.search) && (
+                    {(filters.status || filters.priority) && (
                         <div className="mt-4 flex items-center gap-4">
                             <button
                                 onClick={clearFilters}
@@ -227,11 +200,6 @@ const MyTickets = () => {
                                 Clear All Filters
                             </button>
                             <div className="flex flex-wrap gap-2">
-                                {filters.search && (
-                                    <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
-                                        Search: {filters.search}
-                                    </span>
-                                )}
                                 {filters.status && (
                                     <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
                                         Status: {filters.status.replace('_', ' ')}
@@ -262,12 +230,12 @@ const MyTickets = () => {
                 {tickets.length === 0 ? (
                     <EmptyState
                         title="No tickets found"
-                        message={filters.search || filters.status || filters.priority ?
+                        message={filters.status || filters.priority ?
                             "No tickets match your filters. Try adjusting your search criteria." :
                             "Create your first support ticket to get help."}
-                        buttonText={filters.search || filters.status || filters.priority ? "Clear Filters" : "Create Ticket"}
-                        buttonLink={filters.search || filters.status || filters.priority ? null : "/create-ticket"}
-                        onButtonClick={filters.search || filters.status || filters.priority ? clearFilters : null}
+                        buttonText={filters.status || filters.priority ? "Clear Filters" : "Create Ticket"}
+                        buttonLink={filters.status || filters.priority ? null : "/create-ticket"}
+                        onButtonClick={filters.status || filters.priority ? clearFilters : null}
                         icon="🎫"
                     />
                 ) : (
