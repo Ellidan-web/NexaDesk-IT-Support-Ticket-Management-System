@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import Pagination from '../components/Pagination';
@@ -14,13 +14,24 @@ const AdminTickets = () => {
     const [totalPages, setTotalPages] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const itemsPerPage = 20;
+    const [searchInput, setSearchInput] = useState(''); // ← For input only
+    const [searchTerm, setSearchTerm] = useState(''); // ← For API call
     const [filters, setFilters] = useState({
         status: '',
-        priority: '',
-        search: ''
+        priority: ''
     });
+    const searchInputRef = useRef(null); // ← For focus
 
-    const loadAllTickets = useCallback(async (page = 1) => {
+    // Debounce: wait 1000ms after user stops typing
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            setSearchTerm(searchInput);
+        }, 1000);
+
+        return () => clearTimeout(timer);
+    }, [searchInput]);
+
+    const loadAllTickets = async (page = 1) => {
         setLoading(true);
         setError('');
         try {
@@ -30,10 +41,9 @@ const AdminTickets = () => {
                 limit: itemsPerPage,
             };
 
-            // Only add non-empty filters
             if (filters.status) params.status = filters.status;
             if (filters.priority) params.priority = filters.priority;
-            if (filters.search) params.search = filters.search;
+            if (searchTerm) params.search = searchTerm;
 
             const response = await axios.get(`http://localhost:5000/api/tickets/admin/all`, {
                 headers: {
@@ -46,6 +56,11 @@ const AdminTickets = () => {
             setTotalPages(response.data.pagination?.totalPages || 1);
             setTotalItems(response.data.pagination?.total || 0);
             setCurrentPage(page);
+            
+            // Restore focus after loading
+            if (searchInputRef.current) {
+                searchInputRef.current.focus();
+            }
         } catch (err) {
             setError('Failed to load tickets. Please try again.');
             console.error('Error loading tickets:', err);
@@ -53,11 +68,17 @@ const AdminTickets = () => {
         } finally {
             setLoading(false);
         }
-    }, [filters]);
+    };
 
+    // Reload when searchTerm changes (debounced)
     useEffect(() => {
         loadAllTickets(1);
-    }, [loadAllTickets]);
+    }, [searchTerm]);
+
+    // Initial load only
+    useEffect(() => {
+        loadAllTickets(1);
+    }, []);
 
     const handleFilterChange = (e) => {
         const { name, value } = e.target;
@@ -65,10 +86,18 @@ const AdminTickets = () => {
             ...prev,
             [name]: value
         }));
+        loadAllTickets(1);
     };
 
     const clearFilters = () => {
-        setFilters({ status: '', priority: '', search: '' });
+        setFilters({ status: '', priority: '' });
+        setSearchInput('');
+        setSearchTerm('');
+        loadAllTickets(1);
+        // Focus back to search after clearing
+        if (searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
     };
 
     const getStatusColor = (status) => {
@@ -128,19 +157,17 @@ const AdminTickets = () => {
                     </div>
                 )}
 
-                {/* Filters - Enhanced Dark Theme */}
                 <div className="bg-slate-800 rounded-2xl shadow-xl p-6 mb-8 border border-slate-700">
                     <div className="grid md:grid-cols-3 gap-4">
-                        {/* Search Filter */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">Search</label>
                             <div className="relative">
                                 <input
+                                    ref={searchInputRef}
                                     type="text"
-                                    name="search"
                                     placeholder="Search tickets..."
-                                    value={filters.search}
-                                    onChange={handleFilterChange}
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
                                     className="w-full px-4 py-2 pl-10 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:outline-none focus:ring-nexa-accent focus:border-nexa-accent"
                                 />
                                 <svg className="absolute left-3 top-2.5 h-5 w-5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -149,7 +176,6 @@ const AdminTickets = () => {
                             </div>
                         </div>
 
-                        {/* Status Filter */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">Status</label>
                             <select
@@ -166,7 +192,6 @@ const AdminTickets = () => {
                             </select>
                         </div>
 
-                        {/* Priority Filter */}
                         <div>
                             <label className="block text-sm font-medium text-slate-300 mb-2">Priority</label>
                             <select
@@ -184,7 +209,6 @@ const AdminTickets = () => {
                         </div>
                     </div>
 
-                    {/* Active Filters & Clear Button */}
                     <div className="mt-4 flex items-center justify-between">
                         <button
                             onClick={clearFilters}
@@ -192,11 +216,11 @@ const AdminTickets = () => {
                         >
                             Clear All Filters
                         </button>
-                        {(filters.status || filters.priority || filters.search) && (
+                        {(filters.status || filters.priority || searchTerm) && (
                             <div className="flex flex-wrap gap-2">
-                                {filters.search && (
+                                {searchTerm && (
                                     <span className="px-2 py-1 text-xs bg-slate-700 text-slate-300 rounded-full border border-slate-600">
-                                        Search: {filters.search}
+                                        Search: {searchTerm}
                                     </span>
                                 )}
                                 {filters.status && (
@@ -214,16 +238,15 @@ const AdminTickets = () => {
                     </div>
                 </div>
 
-                {/* Tickets Table */}
                 <div className="bg-slate-800 rounded-2xl shadow-xl overflow-hidden border border-slate-700">
                     {tickets.length === 0 ? (
                         <div className="text-center py-12">
                             <p className="text-slate-400 text-lg">
-                                {filters.status || filters.priority || filters.search ? 
+                                {filters.status || filters.priority || searchTerm ? 
                                     'No tickets match your filters' : 
                                     'No tickets found'}
                             </p>
-                            {(filters.status || filters.priority || filters.search) && (
+                            {(filters.status || filters.priority || searchTerm) && (
                                 <button
                                     onClick={clearFilters}
                                     className="mt-2 text-nexa-accent hover:text-nexa-accent-light hover:underline"
