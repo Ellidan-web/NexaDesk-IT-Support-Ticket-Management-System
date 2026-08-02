@@ -11,6 +11,7 @@ import CreateTicket from './pages/CreateTicket';
 import TicketDetail from './pages/TicketDetail';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminTickets from './pages/AdminTickets';
+import { Toaster } from 'react-hot-toast';
 
 // Import logo
 import logo from './assets/logo.png';
@@ -155,6 +156,33 @@ function App() {
     return (
         <Router>
             <AuthProvider>
+                <Toaster
+                    position="top-right"
+                    toastOptions={{
+                        duration: 4000,
+                        style: {
+                            background: '#1E293B',
+                            color: '#F8FAFC',
+                            border: '1px solid #334155',
+                            borderRadius: '12px',
+                            padding: '16px',
+                        },
+                        success: {
+                            duration: 3000,
+                            iconTheme: {
+                                primary: '#10B981',
+                                secondary: '#F8FAFC',
+                            },
+                        },
+                        error: {
+                            duration: 4000,
+                            iconTheme: {
+                                primary: '#EF4444',
+                                secondary: '#F8FAFC',
+                            },
+                        },
+                    }}
+                />
                 <Routes>
                     <Route path="/" element={
                         <>
