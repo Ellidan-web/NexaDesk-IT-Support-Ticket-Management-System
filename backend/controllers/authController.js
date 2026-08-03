@@ -122,16 +122,29 @@ const login = async (req, res) => {
             { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
         );
 
+        // Generate refresh token
+        const refreshToken = jwt.sign(
+            { userId: user.id },
+            process.env.JWT_SECRET + '_refresh',
+            { expiresIn: '30d' }
+        );
+
+        // Set refresh token as httpOnly cookie
+        res.cookie('refreshToken', refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict',
+            maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+        });
+
+        // Remove password from user object
+        const { password: _, ...userWithoutPassword } = user;
+
         // Return user data and token
         res.json({
             message: 'Login successful',
-            user: {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                role: user.role
-            },
-            token
+            user: userWithoutPassword,
+            token: token
         });
 
     } catch (error) {
@@ -139,6 +152,7 @@ const login = async (req, res) => {
         res.status(500).json({ error: 'Login failed' });
     }
 };
+
 
 // Get current user profile
 const getProfile = async (req, res) => {
@@ -152,13 +166,31 @@ const getProfile = async (req, res) => {
     }
 };
 
-// Logout (client-side, just return success)
+// Logout - clear refresh token cookie
 const logout = async (req, res) => {
     try {
-        res.json({ message: 'Logout successful' });
+        // Clear refresh token cookie
+        res.clearCookie('refreshToken', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'strict'
+        });
+
+        res.json({ 
+            success: true,
+            data: {
+                message: 'Logout successful'
+            }
+        });
     } catch (error) {
         console.error('Logout error:', error);
-        res.status(500).json({ error: 'Logout failed' });
+        res.status(500).json({ 
+            success: false,
+            error: {
+                code: 'LOGOUT_FAILED',
+                message: 'Logout failed'
+            }
+        });
     }
 };
 
@@ -181,11 +213,71 @@ const getAllUsers = async (req, res) => {
         res.status(500).json({ error: 'Failed to get users' });
     }
 };
+// Refresh token - get new access token from refresh token cookie
+const refreshToken = async (req, res) => {
+    try {
+        const refreshToken = req.cookies.refreshToken;
 
+        if (!refreshToken) {
+            return res.status(401).json({
+                success: false,
+                error: {
+                    code: 'NO_REFRESH_TOKEN',
+                    message: 'No refresh token provided'
+                }
+            });
+        }
+
+        // Verify refresh token
+        const decoded = jwt.verify(refreshToken, process.env.JWT_SECRET + '_refresh');
+
+        // Get user
+        const { data: user, error } = await supabaseAdmin
+            .from('users')
+            .select('id, name, email, role')
+            .eq('id', decoded.userId)
+            .single();
+
+        if (error || !user) {
+            return res.status(401).json({
+                success: false,
+                error: {
+                    code: 'INVALID_REFRESH_TOKEN',
+                    message: 'Invalid refresh token'
+                }
+            });
+        }
+
+        // Generate new token
+        const newToken = jwt.sign(
+            { userId: user.id, email: user.email, role: user.role },
+            process.env.JWT_SECRET,
+            { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
+        );
+
+        res.json({
+            success: true,
+            data: {
+                token: newToken
+            }
+        });
+
+    } catch (error) {
+        console.error('Refresh token error:', error);
+        res.status(401).json({
+            success: false,
+            error: {
+                code: 'INVALID_REFRESH_TOKEN',
+                message: 'Invalid refresh token'
+            }
+        });
+    }
+};
 module.exports = {
     register,
     login,
     getProfile,
     logout,
-    getAllUsers
+    getAllUsers,
+    refreshToken 
 };
