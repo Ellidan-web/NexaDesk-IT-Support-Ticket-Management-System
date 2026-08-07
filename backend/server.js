@@ -37,8 +37,26 @@ const authLimiter = rateLimit({
 // Test database connection on startup
 Database.testConnection();
 
-// Security middleware
-app.use(helmet());
+// Enhanced Security middleware with CSP
+app.use(helmet({
+    contentSecurityPolicy: {
+        directives: {
+            defaultSrc: ["'self'"],
+            imgSrc: ["'self'", "data:", "https:"],
+            scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
+            styleSrc: ["'self'", "'unsafe-inline'", "https:"],
+            fontSrc: ["'self'", "https:"],
+            connectSrc: ["'self'", "https://nexadesk-it-support-ticket-management.onrender.com", "https:"],
+            frameAncestors: ["'none'"],
+            baseUri: ["'self'"],
+            formAction: ["'self'"],
+        },
+    },
+    referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
+    crossOriginOpenerPolicy: { policy: 'same-origin' },
+    crossOriginResourcePolicy: { policy: 'same-origin' },
+}));
+
 app.use(cookieParser());
 
 // CORS Configuration - Allow multiple origins
@@ -85,12 +103,13 @@ app.use((req, res, next) => {
     next();
 });
 
-// Security headers
+// Additional security headers (backup for CSP)
 app.use((req, res, next) => {
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
     res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
+    res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=(), usb=()');
     next();
 });
 
