@@ -20,16 +20,15 @@ const PORT = process.env.PORT || 5000;
 // Rate limiting
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 100, // Limit each IP to 100 requests per windowMs
+    max: 100,
     message: 'Too many requests from this IP, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
 });
 
-// Stricter rate limit for auth routes
 const authLimiter = rateLimit({
-    windowMs: 15 * 60 * 1000, // 15 minutes
-    max: 5, // 5 failed attempts per 15 minutes
+    windowMs: 15 * 60 * 1000,
+    max: 5,
     message: 'Too many login attempts, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
@@ -42,17 +41,28 @@ Database.testConnection();
 app.use(helmet());
 app.use(cookieParser());
 
-// CORS
+// CORS Configuration - Allow multiple origins
+const allowedOrigins = [
+    process.env.CLIENT_URL || 'http://localhost:3000',
+    'https://nexa-desk-it-support-ticket-managem-alpha.vercel.app',
+    'https://nexa-desk-it-support-ticket-managem.vercel.app',
+];
+
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:3000',
+    origin: function (origin, callback) {
+        if (!origin) return callback(null, true);
+        if (allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
     credentials: true,
     optionsSuccessStatus: 200
 }));
 
 // Apply rate limiting to all requests
 app.use('/api', limiter);
-
-// Apply stricter rate limit to auth routes
 app.use('/api/auth/login', authLimiter);
 app.use('/api/auth/register', authLimiter);
 
