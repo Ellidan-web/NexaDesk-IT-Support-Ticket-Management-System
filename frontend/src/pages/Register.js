@@ -17,12 +17,14 @@ const Register = () => {
         e.preventDefault();
         setError('');
 
+        // Validate passwords match
         if (password !== confirmPassword) {
             toast.error('Passwords do not match');
             setError('Passwords do not match');
             return;
         }
 
+        // Validate password length
         if (password.length < 6) {
             toast.error('Password must be at least 6 characters');
             setError('Password must be at least 6 characters');
@@ -31,9 +33,9 @@ const Register = () => {
 
         setLoading(true);
         const result = await register(name, email, password);
-        
+
         if (result.success) {
-            toast.success('Account created successfully! 🎉');
+            toast.success('Account created successfully!');
             navigate('/dashboard');
         } else {
             toast.error(result.error || 'Registration failed');

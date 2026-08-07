@@ -17,9 +17,10 @@ const Login = () => {
         setLoading(true);
 
         const result = await login(email, password);
-        
+
         if (result.success) {
-            toast.success('Welcome back! 🎉');
+            toast.success('Welcome back!');
+            // Redirect based on user role
             if (result.user?.role === 'admin' || result.user?.role === 'staff') {
                 navigate('/admin');
             } else {

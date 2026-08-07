@@ -85,7 +85,7 @@ const TicketDetail = () => {
         setUpdating(true);
         const result = await ticketService.updatePriority(id, newPriority);
         if (result.success) {
-            toast.success(`Priority updated to ${newPriority} ✅`);
+            toast.success(`Priority updated to ${newPriority}`);
             setTicket(result.data.ticket);
             await loadTicket();
         } else {
@@ -98,7 +98,7 @@ const TicketDetail = () => {
         setUpdating(true);
         const result = await ticketService.assignTicket(id, assignedTo);
         if (result.success) {
-            toast.success('Ticket assigned successfully! ✅');
+            toast.success('Ticket assigned successfully!');
             setTicket(result.data.ticket);
             await loadTicket();
         } else {
