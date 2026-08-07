@@ -2,12 +2,10 @@ import axios from 'axios';
 
 const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
 
-// Get auth token from localStorage
-const getToken = () => localStorage.getItem('token');
-
-// Create axios instance with auth header
+// Create axios instance with credentials
 const api = axios.create({
     baseURL: API_URL,
+    withCredentials: true,
     headers: {
         'Content-Type': 'application/json'
     }
@@ -16,7 +14,7 @@ const api = axios.create({
 // Add token to requests
 api.interceptors.request.use(
     (config) => {
-        const token = getToken();
+        const token = localStorage.getItem('token');
         if (token) {
             config.headers.Authorization = `Bearer ${token}`;
         }
@@ -40,10 +38,12 @@ const ticketService = {
         }
     },
 
-    // Get user's tickets
-    getUserTickets: async () => {
+    // Get user's tickets with pagination
+    getUserTickets: async (page = 1, limit = 5) => {
         try {
-            const response = await api.get('/tickets/my');
+            const response = await api.get('/tickets/my', {
+                params: { page, limit }
+            });
             return { success: true, data: response.data };
         } catch (error) {
             return {
