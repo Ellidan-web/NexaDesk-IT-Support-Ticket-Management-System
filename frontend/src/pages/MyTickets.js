@@ -36,7 +36,7 @@ const MyTickets = () => {
             if (filters.status) params.status = filters.status;
             if (filters.priority) params.priority = filters.priority;
 
-            const response = await axios.get(`http://localhost:5000/api/tickets/my`, {
+            const response = await axios.get(`https://nexadesk-it-support-ticket-management.onrender.com/api/tickets/my`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },

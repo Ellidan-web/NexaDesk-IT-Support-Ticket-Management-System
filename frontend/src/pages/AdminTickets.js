@@ -36,7 +36,7 @@ const AdminTickets = () => {
             if (filters.status) params.status = filters.status;
             if (filters.priority) params.priority = filters.priority;
 
-            const response = await axios.get(`http://localhost:5000/api/tickets/admin/all`, {
+            const response = await axios.get(`https://nexadesk-it-support-ticket-management.onrender.com/api/tickets/admin/all`, {
                 headers: {
                     'Authorization': `Bearer ${token}`
                 },
