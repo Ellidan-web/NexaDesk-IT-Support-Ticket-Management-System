@@ -101,6 +101,10 @@ const TicketDetail = () => {
             toast.success('Ticket assigned successfully!');
             setTicket(result.data.ticket);
             await loadTicket();
+            // Reload users list to refresh
+            if (isAdmin) {
+                await loadUsers();
+            }
         } else {
             toast.error(result.error || 'Failed to assign ticket');
         }
