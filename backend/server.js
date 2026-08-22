@@ -17,7 +17,14 @@ const ticketRoutes = require('./routes/ticketRoutes');
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Rate limiting
+// ==========================================
+// ⚠️ CRITICAL FIX: TRUST PROXY (I-set BAGO ANG LAHAT)
+// ==========================================
+app.set('trust proxy', 1); 
+
+// ==========================================
+// RATE LIMITING
+// ==========================================
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
     max: 100,
@@ -28,7 +35,7 @@ const limiter = rateLimit({
 
 const authLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
-    max: 5,
+    max: 20, // <--- TAASAN MO TO PARA HINDI KA MA-BLOCK AGAD
     message: 'Too many login attempts, please try again later.',
     standardHeaders: true,
     legacyHeaders: false,
@@ -37,7 +44,9 @@ const authLimiter = rateLimit({
 // Test database connection on startup
 Database.testConnection();
 
-// Enhanced Security middleware with CSP
+// ==========================================
+// SECURITY HEADERS (HELMET)
+// ==========================================
 app.use(helmet({
     contentSecurityPolicy: {
         directives: {
@@ -46,7 +55,7 @@ app.use(helmet({
             scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'", "https:"],
             styleSrc: ["'self'", "'unsafe-inline'", "https:"],
             fontSrc: ["'self'", "https:"],
-            connectSrc: ["'self'", "https://nexadesk-it-support-ticket-management.onrender.com", "https:"],
+            connectSrc: ["'self'", "https://nexadesk-it-support-ticket-management.onrender.com", "https://*.supabase.co", "https:"],
             frameAncestors: ["'none'"],
             baseUri: ["'self'"],
             formAction: ["'self'"],
@@ -54,14 +63,17 @@ app.use(helmet({
     },
     referrerPolicy: { policy: 'strict-origin-when-cross-origin' },
     crossOriginOpenerPolicy: { policy: 'same-origin' },
-    crossOriginResourcePolicy: { policy: 'same-origin' },
+    crossOriginResourcePolicy: { policy: 'cross-origin' }, // <--- ITO ANG TAMANG SETTING
 }));
 
 app.use(cookieParser());
 
-// CORS Configuration - Allow multiple origins
+// ==========================================
+// CORS CONFIGURATION
+// ==========================================
 const allowedOrigins = [
     process.env.CLIENT_URL || 'http://localhost:3000',
+    'https://nexadesk-it-support-ticket-management.onrender.com', // <--- IDAGDAG MO ITO
     'https://nexa-desk-it-support-ticket-managem-alpha.vercel.app',
     'https://nexa-desk-it-support-ticket-managem.vercel.app',
 ];
@@ -79,23 +91,15 @@ app.use(cors({
     optionsSuccessStatus: 200
 }));
 
-// Apply rate limiting to all requests
-app.use('/api', limiter);
-app.use('/api/auth/login', authLimiter);
-app.use('/api/auth/register', authLimiter);
-
-// Body parsing
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
-
-// Logging
-app.use(morgan('dev'));
-
-// Input sanitization middleware
+// ==========================================
+// INPUT SANITIZATION (Excluding Password)
+// ==========================================
+// IMPORTANTE: Hindi dapat i-sanitize ang password dahil binabago nito ang string structure!
 app.use((req, res, next) => {
     if (req.body) {
         Object.keys(req.body).forEach(key => {
-            if (typeof req.body[key] === 'string') {
+            // Huwag i-sanitize ang password at confirmPassword
+            if (key !== 'password' && key !== 'confirmPassword' && typeof req.body[key] === 'string') {
                 req.body[key] = xss(req.body[key]);
             }
         });
@@ -103,17 +107,21 @@ app.use((req, res, next) => {
     next();
 });
 
-// Additional security headers (backup for CSP)
-app.use((req, res, next) => {
-    res.setHeader('X-Content-Type-Options', 'nosniff');
-    res.setHeader('X-Frame-Options', 'DENY');
-    res.setHeader('X-XSS-Protection', '1; mode=block');
-    res.setHeader('Referrer-Policy', 'strict-origin-when-cross-origin');
-    res.setHeader('Permissions-Policy', 'geolocation=(), camera=(), microphone=(), payment=(), usb=()');
-    next();
-});
+// ==========================================
+// BODY PARSING & LOGGING
+// ==========================================
+app.use(express.json({ limit: '10mb' }));
+app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(morgan('dev'));
 
-// API Routes
+// ==========================================
+// API ROUTES
+// ==========================================
+// Apply rate limiting to all requests
+app.use('/api', limiter);
+app.use('/api/auth/login', authLimiter);
+app.use('/api/auth/register', authLimiter);
+
 app.use('/api', routes);
 app.use('/api/auth', authRoutes);
 app.use('/api/tickets', ticketRoutes);
