@@ -288,14 +288,6 @@ const TicketDetail = () => {
                             <p className="font-medium text-[#F8FAFC]">{ticket.users?.name || 'Unknown'}</p>
                         </div>
                     </div>
-
-                    {ticket.assigned_to && ticket.assigned_users && (
-                        <div className="mt-4 bg-green-900/30 rounded-xl p-4 border border-green-500/30">
-                            <p className="text-sm text-green-400">
-                                👤 Assigned to: <span className="font-semibold">{ticket.assigned_users?.name}</span>
-                            </p>
-                        </div>
-                    )}
                 </div>
 
                 {/* Comments Section */}
