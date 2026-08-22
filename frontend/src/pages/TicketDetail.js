@@ -276,7 +276,7 @@ const TicketDetail = () => {
                         <div>
                             <p className="text-sm text-[#94A3B8]">Assigned To</p>
                             <p className="font-medium text-[#F8FAFC]">
-                                {ticket.assigned_to ? 'Assigned' : 'Unassigned'}
+                                {ticket.assigned_users?.name || 'Unassigned'}
                             </p>
                         </div>
                         <div>
