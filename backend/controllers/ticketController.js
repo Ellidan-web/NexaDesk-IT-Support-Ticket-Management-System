@@ -135,12 +135,17 @@ const getTicketById = async (req, res) => {
         const userId = req.user.id;
         const userRole = req.user.role;
 
-        // Get ticket with user info
+        // Get ticket with user info AND assigned user
         const { data: ticket, error: ticketError } = await supabaseAdmin
             .from('tickets')
             .select(`
                 *,
                 users:user_id (
+                    id,
+                    name,
+                    email
+                ),
+                assigned_users:assigned_to (
                     id,
                     name,
                     email
