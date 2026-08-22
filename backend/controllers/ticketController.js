@@ -135,17 +135,17 @@ const getTicketById = async (req, res) => {
         const userId = req.user.id;
         const userRole = req.user.role;
 
-        // Get ticket with user info AND assigned user
+        // Get ticket with user info
         const { data: ticket, error: ticketError } = await supabaseAdmin
             .from('tickets')
             .select(`
                 *,
-                users:user_id (
+                users:tickets_user_id_fkey (
                     id,
                     name,
                     email
                 ),
-                assigned_users:assigned_to (
+                assigned_users:tickets_assigned_to_fkey (
                     id,
                     name,
                     email
@@ -168,7 +168,7 @@ const getTicketById = async (req, res) => {
             .from('comments')
             .select(`
                 *,
-                users:user_id (
+                users:comments_user_id_fkey (
                     id,
                     name,
                     email
@@ -186,7 +186,7 @@ const getTicketById = async (req, res) => {
             .from('ticket_history')
             .select(`
                 *,
-                users:changed_by (
+                users:ticket_history_changed_by_fkey (
                     id,
                     name,
                     email
